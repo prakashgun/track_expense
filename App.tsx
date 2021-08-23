@@ -6,6 +6,7 @@ import { ThemeProvider } from 'react-native-elements'
 import createDefaultAccounts from './src/common/createDefaultAccounts'
 import createDefaultCategories from './src/common/createDefaultCategories'
 import AccountList from './src/components/AccountList'
+import AccountScreen from './src/components/AccountScreen'
 import Menu from './src/components/Menu'
 
 const theme = {
@@ -41,6 +42,7 @@ const App = () => {
             <Stack.Navigator screenOptions={{ headerShown: false }}>
               <Stack.Screen name="AccountList" component={AccountList} />
               <Stack.Screen name="Menu" component={Menu} />
+              <Stack.Screen name="AccountScreen" component={AccountScreen} />
             </Stack.Navigator>
             : <Text>Please Login</Text>
         }
