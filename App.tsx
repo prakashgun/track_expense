@@ -3,11 +3,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import React, { useEffect, useState } from 'react'
 import { Text } from 'react-native'
 import { ThemeProvider } from 'react-native-elements'
-import { getRepository } from 'typeorm/browser'
-import dbConnect from './src/common/dbConnect'
+import createDefaultAccounts from './src/common/createDefaultAccounts'
+import createDefaultCategories from './src/common/createDefaultCategories'
 import AccountList from './src/components/AccountList'
 import Menu from './src/components/Menu'
-import { Account } from './src/entities/Account'
 
 const theme = {
   Button: {
@@ -24,30 +23,14 @@ const theme = {
   }
 }
 
-
 const Stack = createNativeStackNavigator()
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true)
 
-  const createDefaultAccounts = async () => {
-    await dbConnect()
-    const accountRepository = await getRepository(Account)
-    const accountsCount = await accountRepository.count()
-    console.log('Accounts count')
-    console.log(accountsCount)
-
-    if (accountsCount === 0) {
-      const account1 = new Account()
-      account1.name = 'Cash'
-      account1.balance = 0
-      await accountRepository.save(account1)
-      console.log('Default accounts saved')
-    }
-  }
-
   useEffect(() => {
     createDefaultAccounts()
+    createDefaultCategories()
   }, [])
 
   return (
