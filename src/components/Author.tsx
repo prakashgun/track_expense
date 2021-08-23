@@ -5,6 +5,7 @@ import { createConnection, getRepository, Connection, getConnection } from 'type
 import { Author } from '../entities/author';
 import { Category } from '../entities/category';
 import { Post } from '../entities/post';
+import setupConnection from '../common/setupConnection';
 
 
 const AuthorC = () => {
@@ -15,14 +16,7 @@ const AuthorC = () => {
         const con = getConnection()
         }catch(error){
             console.log('Creating connection again')
-            await createConnection({
-                type: 'react-native',
-                database: 'author',
-                location: 'default',
-                logging: ['error', 'query', 'schema'],
-                synchronize: true,
-                entities: [Author, Category, Post],
-              })
+            await setupConnection()
                       const authorRepository = getRepository(Author)
         let result = await authorRepository.find()
         console.log('Author:')

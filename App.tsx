@@ -10,6 +10,7 @@ import { Post } from './src/entities/post';
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { NavigationContainer } from '@react-navigation/native';
 import AuthorC from './src/components/Author'
+import setupConnection from './src/common/setupConnection'
 
 const Stack = createNativeStackNavigator();
 
@@ -31,22 +32,7 @@ const AuthorTile = ({
 const App: () => ReactNode = () => {
   const [defaultConnection, setconnection] = useState<Connection | null>(null);
   const [authors, setAuthors] = useState<Author[]>([]);
-  const setupConnection = useCallback(async () => {
-    try {
-      const connection = await createConnection({
-        type: 'react-native',
-        database: 'author',
-        location: 'default',
-        logging: ['error', 'query', 'schema'],
-        synchronize: true,
-        entities: [Author, Category, Post],
-      });
-      setconnection(connection);
-      getAuthors();
-    } catch (error) {
-      console.log(error);
-    }
-  }, []);
+  
 
   const getAuthors = async () => {
     const authorRepository = getRepository(Author);
