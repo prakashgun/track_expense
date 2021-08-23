@@ -1,85 +1,69 @@
-import React, { useCallback, useEffect, ReactNode, useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
-
-import { createConnection, getRepository, Connection } from 'typeorm/browser';
-import DbContext from './src/context/DbContext';
-
-import { Author } from './src/entities/author';
-import { Category } from './src/entities/category';
-import { Post } from './src/entities/post';
+import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import { NavigationContainer } from '@react-navigation/native';
-import AuthorC from './src/components/Author'
-import setupConnection from './src/common/setupConnection'
+import React, { useEffect, useState } from 'react'
+import { Text } from 'react-native'
+import { ThemeProvider } from 'react-native-elements'
+import { getRepository } from 'typeorm/browser'
+import dbConnect from './src/common/dbConnect'
+import AccountList from './src/components/AccountList'
+import Menu from './src/components/Menu'
+import { Account } from './src/entities/Account'
 
-const Stack = createNativeStackNavigator();
+const theme = {
+  Button: {
+    buttonStyle: {
+      backgroundColor: '#3e3b33'
+    },
+  },
+  Header: {
+    placement: 'left',
+    leftComponent: { icon: 'menu', color: '#fff' },
+    centerComponent: { text: 'MY TITLE', style: { color: '#fff', fontSize: 18 } },
+    rightComponent: { icon: 'home', color: '#fff' },
+    backgroundColor: '#3e3b33'
+  }
+}
 
-const AuthorTile = ({
-  name,
-  birthdate,
-}: {
-  name: string;
-  birthdate: string;
-}) => {
-  return (
-    <View>
-      <Text>{name}</Text>
-      <Text>{birthdate}</Text>
-    </View>
-  );
-};
 
-const App: () => ReactNode = () => {
-  const [defaultConnection, setconnection] = useState<Connection | null>(null);
-  const [authors, setAuthors] = useState<Author[]>([]);
-  
+const Stack = createNativeStackNavigator()
 
-  const getAuthors = async () => {
-    const authorRepository = getRepository(Author);
-    let result = await authorRepository.find();
-    if (result.length === 0) {
-      const newAuthor = new Author();
-      newAuthor.birthdate = '10-03-1940';
-      newAuthor.name = 'Chuck Norris';
-      await authorRepository.save(newAuthor);
-      result = await authorRepository.find();
+const App = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true)
+
+  const createDefaultAccounts = async () => {
+    await dbConnect()
+    const accountRepository = await getRepository(Account)
+    const accountsCount = await accountRepository.count()
+    console.log('Accounts count')
+    console.log(accountsCount)
+
+    if (accountsCount === 0) {
+      const account1 = new Account()
+      account1.name = 'Cash'
+      account1.balance = 0
+      await accountRepository.save(account1)
+      console.log('Default accounts saved')
     }
-    setAuthors(result);
   }
 
   useEffect(() => {
-    if (!defaultConnection) {
-      setupConnection();
-    } else {
-      getAuthors();
-    }
-  }, []);
+    createDefaultAccounts()
+  }, [])
 
   return (
-    <DbContext.Provider value={{ defaultConnection }}>
-      <View style={styles.container}>
-        <Text style={styles.title}>My List of Authors</Text>
-        {authors.map((author) => (
-          <AuthorTile key={author.id.toString()} name={author.name}
-            birthdate={author.birthdate} />
-        ))}
-      </View>
+    <ThemeProvider theme={theme}>
       <NavigationContainer>
-        <Stack.Navigator>
-          <Stack.Screen name="Author" component={AuthorC} />
-        </Stack.Navigator>
+        {
+          isLoggedIn ?
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="AccountList" component={AccountList} />
+              <Stack.Screen name="Menu" component={Menu} />
+            </Stack.Navigator>
+            : <Text>Please Login</Text>
+        }
       </NavigationContainer>
-    </DbContext.Provider>
-  );
-};
+    </ThemeProvider>
+  )
+}
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  title: { fontSize: 16, color: 'black' },
-});
-
-export default App;
+export default App
