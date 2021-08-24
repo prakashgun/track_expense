@@ -46,12 +46,12 @@ const CategoryList = () => {
     }, [isFocused])
 
     return (
-        <View>
+        <View style={styles.container}>
+            <Header
+                leftComponent={{ onPress: () => navigation.navigate('Menu') }}
+                centerComponent={{ text: 'Categories' }}
+            />
             <ScrollView >
-                <Header
-                    leftComponent={{ onPress: () => navigation.navigate('Menu') }}
-                    centerComponent={{ text: 'Categories' }}
-                />
                 {
                     categories && categories.map((category) => (
                         <CategoryItem
@@ -71,4 +71,8 @@ const CategoryList = () => {
 
 export default CategoryList
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+    container: {
+        flex: 1
+    }
+})

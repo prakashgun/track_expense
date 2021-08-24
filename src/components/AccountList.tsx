@@ -47,7 +47,7 @@ const AccountList = () => {
     }, [isFocused])
 
     return (
-        <View>
+        <View style={styles.container}>
             <ScrollView >
                 <Header
                     leftComponent={{ onPress: () => navigation.navigate('Menu') }}
@@ -72,4 +72,8 @@ const AccountList = () => {
 
 export default AccountList
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+    container: {
+        flex: 1
+    }
+})
