@@ -14,6 +14,7 @@ const setupConnection = async () => {
             entities: [Account, Category, Expense],
         })
     } catch (error) {
+        console.log('Error is')
         console.log(error)
     }
 }

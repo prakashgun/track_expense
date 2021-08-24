@@ -1,4 +1,5 @@
 import { useNavigation } from '@react-navigation/core'
+import { useIsFocused } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { Button, Header, Icon, ListItem } from 'react-native-elements'
@@ -30,6 +31,7 @@ const AccountList = () => {
 
     const navigation = useNavigation<any>()
     const [accounts, setAccounts] = useState<Account[]>()
+    const isFocused = useIsFocused()
 
     const getAccounts = async () => {
         await dbConnect()
@@ -38,8 +40,11 @@ const AccountList = () => {
     }
 
     useEffect(() => {
-        getAccounts()
-    }, [])
+        if (isFocused) {
+            getAccounts()
+            console.log('getAccounts')
+        }
+    }, [isFocused])
 
     return (
         <View>
@@ -54,7 +59,6 @@ const AccountList = () => {
                             account={account}
                             key={account.id}
                             onPress={() => {
-                                console.log('Account clicked')
                                 return navigation.navigate('AccountScreen', { id: account.id })
                             }}
                         />

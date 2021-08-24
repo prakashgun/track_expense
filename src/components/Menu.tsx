@@ -6,7 +6,7 @@ import { Header, Icon, ListItem } from 'react-native-elements'
 
 
 const Menu = () => {
-    const navigation = useNavigation()
+    const navigation = useNavigation<any>()
     
     return (
         <View>
