@@ -29,7 +29,7 @@ export class Transaction {
     })
     account: Account
     
-    @ManyToOne(type => Category, category => category.expenses, {
+    @ManyToOne(type => Category, category => category.transactions, {
         onDelete: 'CASCADE'
     })
     category: Category
