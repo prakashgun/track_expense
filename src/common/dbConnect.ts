@@ -1,32 +1,23 @@
-import { createConnection, getConnection } from "typeorm/browser"
+import { ConnectionOptions, createConnection, getConnection } from 'typeorm/browser'
 import { Account } from '../entities/Account'
 import { Category } from '../entities/Category'
 import { Expense } from '../entities/Expense'
 
-const setupConnection = async () => {
-    try {
-        return await createConnection({
-            type: 'react-native',
-            database: 'tract_exp',
-            location: 'default',
-            logging: ['error', 'query', 'schema'],
-            synchronize: true,
-            entities: [Account, Category, Expense],
-        })
-    } catch (error) {
-        console.log('Error is')
-        console.log(error)
-    }
-}
-
 export default async () => {
+    const options: ConnectionOptions = {
+        name: "default",
+        type: "react-native",
+        database: "track_exp",
+        location: "default",
+        logging: ["error", "query", "schema"],
+        synchronize: true,
+        entities: [Account, Category, Expense]
+    }
+
     try {
-        const connection = await getConnection()
-        if (!connection.isConnected) {
-            await connection.connect()
-        }
+        await getConnection(options.name).close()
+        return createConnection(options)
     } catch (error) {
-        console.log('Creating connection again')
-        await setupConnection()
+        return createConnection(options)
     }
 }
