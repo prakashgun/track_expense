@@ -1,4 +1,4 @@
-import { ConnectionOptions, createConnection, getConnection, getConnectionManager } from 'typeorm/browser'
+import { ConnectionOptions, getConnectionManager } from 'typeorm/browser'
 import { Account } from '../entities/Account'
 import { Category } from '../entities/Category'
 import { Transaction } from '../entities/Transaction'
@@ -10,10 +10,7 @@ const options: ConnectionOptions = {
     location: "default",
     logging: ["error", "query", "schema"],
     synchronize: true,
-    entities: [Account, Category, Transaction],
-    extra: {
-        KeepConnectionAlive: true
-    }
+    entities: [Account, Category, Transaction]
 }
 
 const connectionManager = getConnectionManager()
