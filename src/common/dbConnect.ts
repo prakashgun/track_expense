@@ -1,7 +1,7 @@
 import { ConnectionOptions, createConnection, getConnection } from 'typeorm/browser'
 import { Account } from '../entities/Account'
 import { Category } from '../entities/Category'
-import { Expense } from '../entities/Expense'
+import { Transaction } from '../entities/Transaction'
 
 export default async () => {
     const options: ConnectionOptions = {
@@ -11,7 +11,7 @@ export default async () => {
         location: "default",
         logging: ["error", "query", "schema"],
         synchronize: true,
-        entities: [Account, Category, Expense]
+        entities: [Account, Category, Transaction]
     }
 
     try {

@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm/browser"
-import { Expense } from "./Expense"
+import { Transaction } from "./Transaction"
 
 @Entity()
 export class Account{
@@ -17,6 +17,6 @@ export class Account{
     })
     balance: number
 
-    @OneToMany(type=>Expense, expense => expense.account)
-    expenses: Expense[]
+    @OneToMany(type=>Transaction, transaction => transaction.account)
+    transactions: Transaction[]
 }

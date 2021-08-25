@@ -3,7 +3,7 @@ import { Account } from "./Account"
 import { Category } from "./Category"
 
 @Entity()
-export class Expense {
+export class Transaction {
     @PrimaryGeneratedColumn()
     id: number
 
@@ -24,7 +24,7 @@ export class Expense {
     @UpdateDateColumn()
     updated_at: Date
 
-    @ManyToOne(type => Account, account => account.expenses, {
+    @ManyToOne(type => Account, account => account.transactions, {
         onDelete: 'CASCADE'
     })
     account: Account

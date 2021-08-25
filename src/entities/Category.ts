@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm/browser"
-import { Expense } from "./Expense"
+import { Transaction } from "./Transaction"
 
 @Entity()
 export class Category{
@@ -24,6 +24,6 @@ export class Category{
     })
     icon_type: string
 
-    @OneToMany(type=>Expense, expense => expense.category)
-    expenses: Expense[]
+    @OneToMany(type=>Transaction, transaction => transaction.category)
+    transactions: Transaction[]
 }
