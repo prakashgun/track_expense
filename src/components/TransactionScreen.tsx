@@ -2,19 +2,16 @@ import { useIsFocused } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react'
 import { Alert, StyleSheet, View } from 'react-native'
 import { Header, PricingCard } from 'react-native-elements'
-import { getRepository } from 'typeorm/browser'
-import dbConnect from '../common/dbConnect'
-import { getTransaction } from '../common/dbQueries'
-import { Transaction } from '../entities/Transaction'
+import { deleteTransaction, getTransaction } from '../common/dbQueries'
+import TransactionInterface from '../interfaces/TransactionInterface'
 
-const TransactionScreen = ({ navigation, route }) => {
-    const [transaction, setTransaction] = useState<Transaction>()
+
+const TransactionScreen = ({ navigation, route }: any) => {
+    const [transaction, setTransaction] = useState<TransactionInterface>()
     const isFocused = useIsFocused()
 
-    const deleteTransaction = async () => {
-        await dbConnect()
-        const transactionRepository = getRepository(Transaction)
-        await transactionRepository.delete(route.params.id)
+    const deleteTransactionFromDb = async () => {
+        await deleteTransaction(route.params.id)
         console.log('Transaction deleted')
         navigation.navigate('TransactionList')
     }
@@ -41,7 +38,7 @@ const TransactionScreen = ({ navigation, route }) => {
                 },
                 {
                     text: 'OK',
-                    onPress: () => deleteTransaction()
+                    onPress: () => deleteTransactionFromDb()
                 }
             ]
         )
@@ -56,7 +53,7 @@ const TransactionScreen = ({ navigation, route }) => {
             {transaction && <PricingCard
                 color="#3e3b33"
                 title={transaction.name}
-                price={transaction.balance}
+                price={transaction.value}
                 button={{ title: 'Delete', onPress: () => onDeleteItemPress() }}
             />}
         </View>

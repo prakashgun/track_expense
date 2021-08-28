@@ -7,7 +7,7 @@ import { Header, Icon, ListItem } from 'react-native-elements'
 
 const Menu = () => {
     const navigation = useNavigation<any>()
-    
+
     return (
         <View>
             <Header
@@ -34,7 +34,7 @@ const Menu = () => {
                     </ListItem.Content>
                 </ListItem>
             </TouchableOpacity>
-            {/* <TouchableOpacity
+            <TouchableOpacity
                 onPress={() => navigation.navigate('TransactionList')}
             >
                 <ListItem key="TransactionList" bottomDivider>
@@ -43,7 +43,7 @@ const Menu = () => {
                         <ListItem.Title>Transactions</ListItem.Title>
                     </ListItem.Content>
                 </ListItem>
-            </TouchableOpacity> */}
+            </TouchableOpacity>
         </View>
     )
 }

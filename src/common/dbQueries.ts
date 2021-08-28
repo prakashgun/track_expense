@@ -1,5 +1,6 @@
 import AccountInterface from "../interfaces/AccountInterface"
 import CategoryInterface from "../interfaces/CategoryInterface"
+import TransactionInterface from "../interfaces/TransactionInterface"
 import db from "./db"
 import { defaultCategories } from "./defaultData"
 
@@ -162,5 +163,51 @@ export const getCategory = async (id: number) => {
 export const deleteCategory = async (id: number) => {
     await executeQuery(
         `DELETE FROM categories WHERE id=${id}`
+    )
+}
+
+export const getTransactions = async () => {
+    const result: any = await executeQuery(
+        `SELECT * FROM transactions`
+    )
+
+    const items = []
+    const rows = result.rows
+
+    for (let i = 0; i < rows.length; i++) {
+        let item = rows.item(i)
+        item['account'] = await getAccount(item['account_id'])
+        delete item['account_id']
+        item['category'] = await getCategory(item['category_id'])
+        delete item['category_id']
+        items.push(item)
+    }
+
+    return items
+}
+
+export const addTransaction = async (transaction: TransactionInterface) => {
+    await executeQuery(
+        `INSERT INTO transactions (name, value, type, account_id, category_id) VALUES (
+                '${transaction.name}', 
+                '${transaction.value}', 
+                '${transaction.type}',
+                '${transaction.account.id}',
+                '${transaction.category.id}'
+        )`
+    )
+}
+
+export const getTransaction = async (id: number) => {
+    const result: any = await executeQuery(
+        `SELECT * FROM transactions WHERE id=${id}`
+    )
+
+    return itemFromResult(result)
+}
+
+export const deleteTransaction = async (id: number) => {
+    await executeQuery(
+        `DELETE FROM transactions WHERE id=${id}`
     )
 }

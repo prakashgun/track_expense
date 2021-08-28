@@ -5,7 +5,7 @@ import { addCategory } from '../common/dbQueries'
 
 
 const AddCategory = ({ navigation }: any) => {
-    const [name, setName] = useState('')
+    const [name, setName] = useState<string>('')
     const [iconSetExpanded, setIconSetExpanded] = useState<boolean>(false)
 
     const icons = [

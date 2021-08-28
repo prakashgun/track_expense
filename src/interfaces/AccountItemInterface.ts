@@ -1,4 +1,4 @@
-import AccountInterface from "./AccountInterface";
+import AccountInterface from "./AccountInterface"
 
 export default interface AccountItemInterface {
     account: AccountInterface,

@@ -4,12 +4,9 @@ import React, { useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { Button, Header, Icon, ListItem } from 'react-native-elements'
 import { getTransactions } from '../common/dbQueries'
-import { Transaction } from '../entities/Transaction'
+import TransactionInterface from '../interfaces/TransactionInterface'
+import TransactionItemInterface from '../interfaces/TransactionItemInterface'
 
-interface TransactionItemInterface {
-    transaction: Transaction,
-    onPress: () => void
-}
 
 const TransactionItem = ({ transaction, onPress }: TransactionItemInterface) => (
     <TouchableOpacity onPress={onPress}>
@@ -20,11 +17,11 @@ const TransactionItem = ({ transaction, onPress }: TransactionItemInterface) => 
             <Icon name="bank" type="font-awesome" />
             <ListItem.Content>
                 <ListItem.Title>{transaction.name}</ListItem.Title>
-                <ListItem.Subtitle>{transaction.account.name}</ListItem.Subtitle>
                 <ListItem.Subtitle>{transaction.category.name}</ListItem.Subtitle>
             </ListItem.Content>
             <ListItem.Content right>
                 <ListItem.Title>{transaction.value}</ListItem.Title>
+                <ListItem.Subtitle>{transaction.account.name}</ListItem.Subtitle>
             </ListItem.Content>
         </ListItem>
     </TouchableOpacity>
@@ -33,7 +30,7 @@ const TransactionItem = ({ transaction, onPress }: TransactionItemInterface) => 
 const TransactionList = () => {
 
     const navigation = useNavigation<any>()
-    const [transactions, setTransactions] = useState<Transaction[]>()
+    const [transactions, setTransactions] = useState<TransactionInterface[]>()
     const isFocused = useIsFocused()
 
     const setTransactionsFromDb = async () => {

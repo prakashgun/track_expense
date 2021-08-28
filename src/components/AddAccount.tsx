@@ -7,7 +7,7 @@ import { addAccount } from '../common/dbQueries'
 
 const AddAccount = () => {
     const navigation = useNavigation<any>()
-    const [name, setName] = useState('')
+    const [name, setName] = useState<string>('')
     const [balance, setBalance] = useState<any>()
 
     const onAddItemPress = async () => {

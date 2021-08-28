@@ -2,25 +2,22 @@ import { useIsFocused, useNavigation } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react'
 import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { Button, Header, Icon, Input, ListItem, Overlay } from 'react-native-elements'
-import { getRepository } from 'typeorm/browser'
-import dbConnect from '../common/dbConnect'
-import { getAccounts, getCategories } from '../common/dbQueries'
-import { Account } from '../entities/Account'
-import { Category } from '../entities/Category'
-import { Transaction } from '../entities/Transaction'
+import { addTransaction, getAccounts, getCategories } from '../common/dbQueries'
+import AccountInterface from '../interfaces/AccountInterface'
+import CategoryInterface from '../interfaces/CategoryInterface'
+import { TransactionTypes } from '../interfaces/TransactionInterface'
+
 
 const AddTransaction = () => {
     const navigation = useNavigation<any>()
-    const [name, setName] = useState('')
-    const [value, setValue] = useState(null)
-    const [accountsExpanded, setAccountsExpanded] = useState(false)
-    const [selectedAccount, setSelectedAccount] = useState<Account>()
-    const [categoriesExpanded, setCategoriesExpanded] = useState(false)
-    const [selectedCategory, setSelectedCategory] = useState<Category>()
-    const [accounts, setAccounts] = useState<Account[]>()
-    const [categories, setCategories] = useState<Category[]>()
-
-
+    const [name, setName] = useState<string>('')
+    const [value, setValue] = useState<any>()
+    const [accountsExpanded, setAccountsExpanded] = useState<boolean>(false)
+    const [selectedAccount, setSelectedAccount] = useState<AccountInterface>()
+    const [categoriesExpanded, setCategoriesExpanded] = useState<boolean>(false)
+    const [selectedCategory, setSelectedCategory] = useState<CategoryInterface>()
+    const [accounts, setAccounts] = useState<AccountInterface[]>()
+    const [categories, setCategories] = useState<CategoryInterface[]>()
     const isFocused = useIsFocused()
 
     const setAccountsFromDb = async () => {
@@ -50,13 +47,13 @@ const AddTransaction = () => {
         setAccountsExpanded(!accountsExpanded)
     }
 
-    const onAccountIconPress = (account) => {
+    const onAccountIconPress = (account: AccountInterface) => {
         console.log('account icon pressed: ', account)
         setSelectedAccount(account)
         setAccountsExpanded(!accountsExpanded)
     }
 
-    const onCategoryIconPress = (category) => {
+    const onCategoryIconPress = (category: CategoryInterface) => {
         console.log('category icon pressed: ', category)
         setSelectedCategory(category)
         setCategoriesExpanded(!categoriesExpanded)
@@ -84,25 +81,15 @@ const AddTransaction = () => {
             return
         }
 
-        await dbConnect()
-        const transactionRepository = getRepository(Transaction)
+        await addTransaction({
+            name: name,
+            value: value,
+            type: TransactionTypes.expense,
+            account: selectedAccount,
+            category: selectedCategory
+        })
 
-        try {
-            const transaction = new Transaction()
-            transaction.name = name
-            transaction.value = value
-            transaction.type = 'debit'
-            transaction.account = selectedAccount
-            transaction.category = selectedCategory
-            await transactionRepository.save(transaction)
-            console.log('Transaction saved')
-        } catch (error) {
-            console.log('Error in saving transaction')
-            Alert.alert('Error in saving transaction. Please contact support.')
-            console.log(error)
-            return
-        }
-
+        console.log('Transaction saved')
         navigation.goBack()
     }
 

@@ -1,4 +1,4 @@
-import CategoryInterface from "./CategoryInterface";
+import CategoryInterface from "./CategoryInterface"
 
 export default interface CategoryItemInterface {
     category: CategoryInterface,
