@@ -7,6 +7,9 @@ import { createTables, generateDefaultData } from './src/common/dbQueries'
 import AccountList from './src/components/AccountList'
 import AccountScreen from './src/components/AccountScreen'
 import AddAccount from './src/components/AddAccount'
+import AddCategory from './src/components/AddCategory'
+import CategoryList from './src/components/CategoryList'
+import CategoryScreen from './src/components/CategoryScreen'
 import Menu from './src/components/Menu'
 
 const theme = {
@@ -43,10 +46,10 @@ const App = () => {
               <Stack.Screen name="AccountList" component={AccountList} />
               <Stack.Screen name="AddAccount" component={AddAccount} />
               <Stack.Screen name="AccountScreen" component={AccountScreen} />
-              {/* <Stack.Screen name="CategoryList" component={CategoryList} />
+              <Stack.Screen name="CategoryList" component={CategoryList} />
               <Stack.Screen name="AddCategory" component={AddCategory} />
               <Stack.Screen name="CategoryScreen" component={CategoryScreen} />
-              <Stack.Screen name="TransactionList" component={TransactionList} />
+              {/* <Stack.Screen name="TransactionList" component={TransactionList} />
               <Stack.Screen name="AddTransaction" component={AddTransaction} />
               <Stack.Screen name="TransactionScreen" component={TransactionScreen} /> */}
               <Stack.Screen name="Menu" component={Menu} />

@@ -1,4 +1,5 @@
 import AccountInterface from "../interfaces/AccountInterface"
+import CategoryInterface from "../interfaces/CategoryInterface"
 import db from "./db"
 import { defaultCategories } from "./defaultData"
 
@@ -63,8 +64,8 @@ export const createTables = async () => {
             account_id INTEGER NOT NULL,
             category_id INTEGER NOT NULL,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY(account_id) REFERENCES accounts(id),
-            FOREIGN KEY(category_id) REFERENCES categories(id)
+            FOREIGN KEY(account_id) REFERENCES accounts(id) ON DELETE CASCADE,
+            FOREIGN KEY(category_id) REFERENCES categories(id) ON DELETE CASCADE
         )`
     )
 }
@@ -141,4 +142,25 @@ export const getCategories = async () => {
     )
 
     return itemsFromResult(result)
+}
+
+export const addCategory = async (category: CategoryInterface) => {
+    await executeQuery(
+        `INSERT INTO categories (name, icon_name, icon_type) VALUES 
+            ('${category.name}', '${category.icon_name}', '${category.icon_type}')`
+    )
+}
+
+export const getCategory = async (id: number) => {
+    const result: any = await executeQuery(
+        `SELECT * FROM categories WHERE id=${id}`
+    )
+
+    return itemFromResult(result)
+}
+
+export const deleteCategory = async (id: number) => {
+    await executeQuery(
+        `DELETE FROM categories WHERE id=${id}`
+    )
 }

@@ -4,12 +4,9 @@ import React, { useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { Button, Header, Icon, ListItem } from 'react-native-elements'
 import { getCategories } from '../common/dbQueries'
-import { Category } from '../entities/Category'
+import CategoryInterface from '../interfaces/CategoryInterface'
+import CategoryItemInterface from '../interfaces/CategoryItemInterface'
 
-interface CategoryItemInterface {
-    category: Category,
-    onPress: () => void
-}
 
 const CategoryItem = ({ category, onPress }: CategoryItemInterface) => (
     <TouchableOpacity onPress={onPress}>
@@ -28,7 +25,7 @@ const CategoryItem = ({ category, onPress }: CategoryItemInterface) => (
 const CategoryList = () => {
 
     const navigation = useNavigation<any>()
-    const [categories, setCategories] = useState<Category[]>()
+    const [categories, setCategories] = useState<CategoryInterface[]>()
     const isFocused = useIsFocused()
 
     const setCategoriesFromDb = async () => {

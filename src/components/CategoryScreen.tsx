@@ -2,19 +2,16 @@ import { useIsFocused } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react'
 import { Alert, StyleSheet, View } from 'react-native'
 import { Header, PricingCard } from 'react-native-elements'
-import { getRepository } from 'typeorm/browser'
-import dbConnect from '../common/dbConnect'
-import { getCategory } from '../common/dbQueries'
-import { Category } from '../entities/Category'
+import { deleteCategory, getCategory } from '../common/dbQueries'
+import CategoryInterface from '../interfaces/CategoryInterface'
 
-const CategoryScreen = ({ navigation, route }) => {
-    const [category, setCategory] = useState<Category>()
+
+const CategoryScreen = ({ navigation, route }:any) => {
+    const [category, setCategory] = useState<CategoryInterface>()
     const isFocused = useIsFocused()
 
-    const deleteCategory = async () => {
-        await dbConnect()
-        const categoryRepository = getRepository(Category)
-        await categoryRepository.delete(route.params.id)
+    const deleteCategoryFromDb = async () => {
+        await deleteCategory(route.params.id)
         console.log('Category deleted')
         navigation.navigate('CategoryList')
     }
@@ -41,7 +38,7 @@ const CategoryScreen = ({ navigation, route }) => {
                 },
                 {
                     text: 'OK',
-                    onPress: () => deleteCategory()
+                    onPress: () => deleteCategoryFromDb()
                 }
             ]
         )

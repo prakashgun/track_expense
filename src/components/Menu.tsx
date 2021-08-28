@@ -24,7 +24,7 @@ const Menu = () => {
                     </ListItem.Content>
                 </ListItem>
             </TouchableOpacity>
-            {/* <TouchableOpacity
+            <TouchableOpacity
                 onPress={() => navigation.navigate('CategoryList')}
             >
                 <ListItem key="CategoryList" bottomDivider>
@@ -34,7 +34,7 @@ const Menu = () => {
                     </ListItem.Content>
                 </ListItem>
             </TouchableOpacity>
-            <TouchableOpacity
+            {/* <TouchableOpacity
                 onPress={() => navigation.navigate('TransactionList')}
             >
                 <ListItem key="TransactionList" bottomDivider>

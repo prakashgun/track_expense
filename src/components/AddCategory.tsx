@@ -1,13 +1,12 @@
 import React, { useState } from 'react'
 import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { Button, Header, Icon, Input, ListItem, Overlay } from 'react-native-elements'
-import { getRepository } from 'typeorm/browser'
-import dbConnect from '../common/dbConnect'
-import { Category } from '../entities/Category'
+import { addCategory } from '../common/dbQueries'
 
-const AddCategory = ({ navigation }) => {
+
+const AddCategory = ({ navigation }: any) => {
     const [name, setName] = useState('')
-    const [iconSetExpanded, setIconSetExpanded] = useState(false)
+    const [iconSetExpanded, setIconSetExpanded] = useState<boolean>(false)
 
     const icons = [
         { icon_name: 'bowl', icon_type: 'entypo' },
@@ -60,7 +59,7 @@ const AddCategory = ({ navigation }) => {
 
     const [selectedIcon, setSelectedIcon] = useState(icons[0])
 
-    const onIconPress = (icon) => {
+    const onIconPress = (icon: { icon_name: string, icon_type: string }) => {
         console.log('Icon pressed: ', icon)
         setSelectedIcon(icon)
         toggleCategoriesOverlay()
@@ -82,16 +81,13 @@ const AddCategory = ({ navigation }) => {
             return
         }
 
-        await dbConnect()
-        const categoryRepository = getRepository(Category)
+        await addCategory({
+            name: name,
+            icon_name: selectedIcon.icon_name,
+            icon_type: selectedIcon.icon_type
+        })
 
-        const category = new Category()
-        category.name = name
-        category.icon_name = selectedIcon.icon_name
-        category.icon_type = selectedIcon.icon_type
-        await categoryRepository.save(category)
         console.log('Category saved')
-
         navigation.goBack()
     }
 

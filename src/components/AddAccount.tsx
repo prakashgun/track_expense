@@ -27,6 +27,7 @@ const AddAccount = () => {
             balance: balance
         })
 
+        console.log('Account saved')
         navigation.goBack()
     }
 
