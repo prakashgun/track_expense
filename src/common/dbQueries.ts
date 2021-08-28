@@ -1,7 +1,7 @@
-import { SQLiteDatabase } from "react-native-sqlite-storage"
+import db from "./db"
 import { defaultCategories } from "./defaultData"
 
-const executeQuery = (db: SQLiteDatabase, sql: string, params = []) => new Promise((resolve, reject) => {
+const executeQuery = (sql: string, params = []) => new Promise((resolve, reject) => {
     db.transaction((trans) => {
         trans.executeSql(sql, params, (trans, results) => {
             resolve(results)
@@ -25,13 +25,12 @@ const itemsFromResult = (result: any) => {
     return items
 }
 
-export const createTables = async (db: SQLiteDatabase) => {
-    // await executeQuery(db, 'DROP TABLE IF EXISTS accounts')
-    // await executeQuery(db, 'DROP TABLE IF EXISTS categories')
-    // await executeQuery(db, 'DROP TABLE IF EXISTS transactions')
+export const createTables = async () => {
+    // await executeQuery('DROP TABLE IF EXISTS accounts')
+    // await executeQuery('DROP TABLE IF EXISTS categories')
+    // await executeQuery('DROP TABLE IF EXISTS transactions')
 
     await executeQuery(
-        db,
         `CREATE TABLE IF NOT EXISTS accounts(
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     name TEXT NOT NULL UNIQUE,
@@ -41,7 +40,6 @@ export const createTables = async (db: SQLiteDatabase) => {
     )
 
     await executeQuery(
-        db,
         `CREATE TABLE IF NOT EXISTS categories(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL UNIQUE,
@@ -52,7 +50,6 @@ export const createTables = async (db: SQLiteDatabase) => {
     )
 
     await executeQuery(
-        db,
         `CREATE TABLE IF NOT EXISTS transactions(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL UNIQUE,
@@ -67,10 +64,9 @@ export const createTables = async (db: SQLiteDatabase) => {
     )
 }
 
-export const generateDefaultData = async (db: SQLiteDatabase) => {
+export const generateDefaultData = async () => {
 
     const accountsResult: any = await executeQuery(
-        db,
         `SELECT COUNT(*) as count FROM accounts`
     )
 
@@ -78,13 +74,11 @@ export const generateDefaultData = async (db: SQLiteDatabase) => {
         console.log('Generating default accounts')
 
         await executeQuery(
-            db,
             `INSERT INTO accounts (name, balance) VALUES ('Cash', 0)`
         )
     }
 
     const categoriesResult: any = await executeQuery(
-        db,
         `SELECT COUNT(*) as count FROM categories`
     )
 
@@ -103,14 +97,13 @@ export const generateDefaultData = async (db: SQLiteDatabase) => {
                 categoryQuery += ','
             }
         })
-        
-        await executeQuery(db, categoryQuery)
+
+        await executeQuery(categoryQuery)
     }
 }
 
-export const getCategories = async (db: SQLiteDatabase) => {
+export const getCategories = async () => {
     const categoriesResult: any = await executeQuery(
-        db,
         `SELECT * FROM categories`
     )
 
