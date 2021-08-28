@@ -1,3 +1,4 @@
+import AccountInterface from "../interfaces/AccountInterface"
 import db from "./db"
 import { defaultCategories } from "./defaultData"
 
@@ -23,6 +24,10 @@ const itemsFromResult = (result: any) => {
     }
 
     return items
+}
+
+const itemFromResult = (result: any) => {
+    return result.rows.item(0)
 }
 
 export const createTables = async () => {
@@ -102,10 +107,38 @@ export const generateDefaultData = async () => {
     }
 }
 
+export const getAccounts = async () => {
+    const result: any = await executeQuery(
+        `SELECT * FROM accounts`
+    )
+
+    return itemsFromResult(result)
+}
+
+export const addAccount = async (account: AccountInterface) => {
+    await executeQuery(
+        `INSERT INTO accounts (name, balance) VALUES ('${account.name}', '${account.balance}')`
+    )
+}
+
+export const getAccount = async (id: number) => {
+    const result: any = await executeQuery(
+        `SELECT * FROM accounts WHERE id=${id}`
+    )
+
+    return itemFromResult(result)
+}
+
+export const deleteAccount = async (id: number) => {
+    await executeQuery(
+        `DELETE FROM accounts WHERE id=${id}`
+    )
+}
+
 export const getCategories = async () => {
-    const categoriesResult: any = await executeQuery(
+    const result: any = await executeQuery(
         `SELECT * FROM categories`
     )
 
-    return itemsFromResult(categoriesResult)
+    return itemsFromResult(result)
 }
