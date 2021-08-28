@@ -18,6 +18,11 @@ export class Transaction {
     })
     value: number
 
+    @Column({
+        nullable: false
+    })
+    type: string
+
     @CreateDateColumn()
     created_at: Date
 

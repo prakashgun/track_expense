@@ -3,8 +3,7 @@ import { useIsFocused } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { Button, Header, Icon, ListItem } from 'react-native-elements'
-import { getRepository } from 'typeorm/browser'
-import dbConnect from '../common/dbConnect'
+import { getCategories } from '../common/dbQueries'
 import { Category } from '../entities/Category'
 
 interface CategoryItemInterface {
@@ -32,16 +31,13 @@ const CategoryList = () => {
     const [categories, setCategories] = useState<Category[]>()
     const isFocused = useIsFocused()
 
-    const getCategories = async () => {
-        await dbConnect()
-        const categoryRepository = getRepository(Category)
-        setCategories(await categoryRepository.find({ take: 10000 }))
+    const setCategoriesFromDb = async () => {
+        setCategories(await getCategories())
     }
 
     useEffect(() => {
         if (isFocused) {
-            getCategories()
-            console.log('getCategories')
+            setCategoriesFromDb()
         }
     }, [isFocused])
 

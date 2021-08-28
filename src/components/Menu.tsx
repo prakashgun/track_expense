@@ -35,12 +35,12 @@ const Menu = () => {
                 </ListItem>
             </TouchableOpacity>
             <TouchableOpacity
-                onPress={() => navigation.navigate('ExpenseList')}
+                onPress={() => navigation.navigate('TransactionList')}
             >
-                <ListItem key="ExpenseList" bottomDivider>
+                <ListItem key="TransactionList" bottomDivider>
                     <Icon name="price-tag" type="entypo" />
                     <ListItem.Content>
-                        <ListItem.Title>Expenses</ListItem.Title>
+                        <ListItem.Title>Transactions</ListItem.Title>
                     </ListItem.Content>
                 </ListItem>
             </TouchableOpacity>

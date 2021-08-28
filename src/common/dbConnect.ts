@@ -1,4 +1,4 @@
-import { ConnectionOptions, getConnectionManager } from 'typeorm/browser'
+import { ConnectionOptions, getConnection, getConnectionManager } from 'typeorm/browser'
 import { Account } from '../entities/Account'
 import { Category } from '../entities/Category'
 import { Transaction } from '../entities/Transaction'
@@ -6,10 +6,11 @@ import { Transaction } from '../entities/Transaction'
 const options: ConnectionOptions = {
     name: "default",
     type: "react-native",
-    database: "track_exp",
+    database: "trackexp",
     location: "default",
     logging: ["error", "query", "schema"],
-    synchronize: true,
+    synchronize: false,
+    migrationsRun: true,
     entities: [Account, Category, Transaction]
 }
 

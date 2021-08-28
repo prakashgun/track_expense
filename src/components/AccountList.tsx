@@ -3,8 +3,7 @@ import { useIsFocused } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { Button, Header, Icon, ListItem } from 'react-native-elements'
-import { getRepository } from 'typeorm/browser'
-import dbConnect from '../common/dbConnect'
+import { getAccounts } from '../common/dbQueries'
 import { Account } from '../entities/Account'
 
 interface AccountItemInterface {
@@ -21,7 +20,9 @@ const AccountItem = ({ account, onPress }: AccountItemInterface) => (
             <Icon name="bank" type="font-awesome" />
             <ListItem.Content>
                 <ListItem.Title>{account.name}</ListItem.Title>
-                <ListItem.Subtitle>{account.balance}</ListItem.Subtitle>
+            </ListItem.Content>
+            <ListItem.Content right>
+                <ListItem.Title>{account.balance}</ListItem.Title>
             </ListItem.Content>
         </ListItem>
     </TouchableOpacity>
@@ -33,16 +34,13 @@ const AccountList = () => {
     const [accounts, setAccounts] = useState<Account[]>()
     const isFocused = useIsFocused()
 
-    const getAccounts = async () => {
-        await dbConnect()
-        const accountRepository = getRepository(Account)
-        setAccounts(await accountRepository.find({ take: 10000 }))
+    const setAccountsFromDb = async () => {
+        setAccounts(await getAccounts())
     }
 
     useEffect(() => {
         if (isFocused) {
-            getAccounts()
-            console.log('getAccounts')
+            setAccountsFromDb()
         }
     }, [isFocused])
 

@@ -4,17 +4,12 @@ import { Alert, StyleSheet, View } from 'react-native'
 import { Header, PricingCard } from 'react-native-elements'
 import { getRepository } from 'typeorm/browser'
 import dbConnect from '../common/dbConnect'
+import { getCategory } from '../common/dbQueries'
 import { Category } from '../entities/Category'
 
 const CategoryScreen = ({ navigation, route }) => {
     const [category, setCategory] = useState<Category>()
     const isFocused = useIsFocused()
-
-    const getCategory = async () => {
-        await dbConnect()
-        const categoryRepository = getRepository(Category)
-        setCategory(await categoryRepository.findOne(route.params.id))
-    }
 
     const deleteCategory = async () => {
         await dbConnect()
@@ -24,9 +19,13 @@ const CategoryScreen = ({ navigation, route }) => {
         navigation.navigate('CategoryList')
     }
 
+    const setCategoryFromDb = async () => {
+        setCategory(await getCategory(route.params.id))
+    }
+
     useEffect(() => {
         if (isFocused) {
-            getCategory()
+            setCategoryFromDb()
         }
     }, [isFocused])
 

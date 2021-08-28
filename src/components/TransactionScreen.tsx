@@ -4,35 +4,35 @@ import { Alert, StyleSheet, View } from 'react-native'
 import { Header, PricingCard } from 'react-native-elements'
 import { getRepository } from 'typeorm/browser'
 import dbConnect from '../common/dbConnect'
-import { getAccount } from '../common/dbQueries'
-import { Account } from '../entities/Account'
+import { getTransaction } from '../common/dbQueries'
+import { Transaction } from '../entities/Transaction'
 
-const AccountScreen = ({ navigation, route }) => {
-    const [account, setAccount] = useState<Account>()
+const TransactionScreen = ({ navigation, route }) => {
+    const [transaction, setTransaction] = useState<Transaction>()
     const isFocused = useIsFocused()
 
-    const setAccountFromDb = async () => {
-        setAccount(await getAccount(route.params.id))
+    const deleteTransaction = async () => {
+        await dbConnect()
+        const transactionRepository = getRepository(Transaction)
+        await transactionRepository.delete(route.params.id)
+        console.log('Transaction deleted')
+        navigation.navigate('TransactionList')
     }
 
-    const deleteAccount = async () => {
-        await dbConnect()
-        const accountRepository = getRepository(Account)
-        await accountRepository.delete(route.params.id)
-        console.log('Account deleted')
-        navigation.navigate('AccountList')
+    const setTransactionFromDb = async () => {
+        setTransaction(await getTransaction(route.params.id))
     }
 
     useEffect(() => {
         if (isFocused) {
-            setAccountFromDb()
+            setTransactionFromDb()
         }
     }, [isFocused])
 
     const onDeleteItemPress = () => {
         Alert.alert(
             'Delete',
-            'Delete this account and all associated records ?',
+            'Delete this transaction and all associated records ?',
             [
                 {
                     text: 'Cancel',
@@ -41,7 +41,7 @@ const AccountScreen = ({ navigation, route }) => {
                 },
                 {
                     text: 'OK',
-                    onPress: () => deleteAccount()
+                    onPress: () => deleteTransaction()
                 }
             ]
         )
@@ -51,18 +51,18 @@ const AccountScreen = ({ navigation, route }) => {
         <View>
             <Header
                 leftComponent={{ onPress: () => navigation.navigate('Menu') }}
-                centerComponent={{ text: 'Account Detail' }}
+                centerComponent={{ text: 'Transaction Detail' }}
             />
-            {account && <PricingCard
+            {transaction && <PricingCard
                 color="#3e3b33"
-                title={account.name}
-                price={account.balance}
+                title={transaction.name}
+                price={transaction.balance}
                 button={{ title: 'Delete', onPress: () => onDeleteItemPress() }}
             />}
         </View>
     )
 }
 
-export default AccountScreen
+export default TransactionScreen
 
 const styles = StyleSheet.create({})

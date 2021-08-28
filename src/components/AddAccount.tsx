@@ -26,11 +26,18 @@ const AddAccount = () => {
         await dbConnect()
         const accountRepository = getRepository(Account)
 
-        const account = new Account()
-        account.name = name
-        account.balance = balance
-        await accountRepository.save(account)
-        console.log('Account saved')
+        try {
+            const account = new Account()
+            account.name = name
+            account.balance = balance
+            await accountRepository.save(account)
+            console.log('Account saved')
+        } catch (error) {
+            console.log('Error in saving account')
+            Alert.alert('Error in saving account. Please contact support.')
+            console.log(error)
+            return
+        }
 
         navigation.goBack()
     }
