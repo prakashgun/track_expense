@@ -59,7 +59,7 @@ export const createTables = async () => {
     await executeQuery(
         `CREATE TABLE IF NOT EXISTS transactions(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL UNIQUE,
+            name TEXT,
             value REAL NOT NULL,
             type TEXT NOT NULL,
             account_id INTEGER NOT NULL,

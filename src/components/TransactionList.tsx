@@ -12,12 +12,12 @@ const TransactionItem = ({ transaction, onPress }: TransactionItemInterface) => 
     <TouchableOpacity onPress={onPress}>
         <ListItem
             key={transaction.id}
-            bottomDivider
+            bottomDivider   
         >
             <Icon name="bank" type="font-awesome" />
             <ListItem.Content>
-                <ListItem.Title>{transaction.name}</ListItem.Title>
-                <ListItem.Subtitle>{transaction.category.name}</ListItem.Subtitle>
+                <ListItem.Title>{transaction.category.name}</ListItem.Title>
+                {transaction.name.trim() !== '' && <ListItem.Subtitle>{transaction.name}</ListItem.Subtitle>}
             </ListItem.Content>
             <ListItem.Content right>
                 <ListItem.Title>{transaction.value}</ListItem.Title>

@@ -60,12 +60,6 @@ const AddTransaction = () => {
     }
 
     const onAddItemPress = async () => {
-
-        if (name.length < 2) {
-            Alert.alert('Name should have atleast two characters')
-            return
-        }
-
         if (!value) {
             Alert.alert('Transaction value cannot be empty')
             return
@@ -98,11 +92,6 @@ const AddTransaction = () => {
             <Header
                 leftComponent={{ onPress: () => navigation.navigate('Menu') }}
                 centerComponent={{ text: 'Add Transaction' }}
-            />
-            <Input
-                placeholder="Name"
-                leftIcon={{ type: 'font-awesome', name: 'bank' }}
-                onChangeText={setName}
             />
             <Input
                 placeholder="Value"
@@ -152,6 +141,11 @@ const AddTransaction = () => {
                     ))}
                 </ScrollView>
             </Overlay>
+            <Input
+                placeholder="Name (Optional)"
+                leftIcon={{ type: 'font-awesome', name: 'bank' }}
+                onChangeText={setName}
+            />
             <Button title="Save" onPress={onAddItemPress} />
         </View>
     )
