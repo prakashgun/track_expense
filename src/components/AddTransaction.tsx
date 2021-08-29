@@ -59,8 +59,6 @@ const AddTransaction = () => {
         const allCategories = await getCategories()
         setCategories(allCategories)
         setSelectedCategory(allCategories[0])
-        console.log('Default selected category is:')
-        console.log(allCategories[0])
     }
 
     const toggleCategoriesOverlay = () => {

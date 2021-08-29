@@ -34,6 +34,7 @@ const itemFromResult = (result: any) => {
 }
 
 export const createTables = async () => {
+    // console.log('Dropping tables')
     // await executeQuery('DROP TABLE IF EXISTS accounts')
     // await executeQuery('DROP TABLE IF EXISTS categories')
     // await executeQuery('DROP TABLE IF EXISTS transactions')
@@ -41,10 +42,10 @@ export const createTables = async () => {
 
     await executeQuery(
         `CREATE TABLE IF NOT EXISTS accounts (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL UNIQUE,
-                    balance REAL NOT NULL,
-                    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL UNIQUE,
+            balance REAL NOT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
         )`
     )
 
@@ -132,7 +133,7 @@ export const getAccounts = async () => {
 
 export const addAccount = async (account: AccountInterface) => {
     await executeQuery(
-        `INSERT INTO accounts (name, balance) VALUES ('${account.name}', '${account.balance}')`
+        `INSERT INTO accounts (name, balance) VALUES ('${account.name}', ${account.balance})`
     )
 }
 
@@ -228,7 +229,7 @@ export const deleteTransaction = async (id: number) => {
 export const addTransfer = async (transfer: TransferInterface) => {
     await executeQuery(
         `INSERT INTO transfers (from_id, to_id) VALUES (
-            '${transfer.from_transaction.id}', '${transfer.to_transaction.id}'
+            ${transfer.from_transaction.id}, ${transfer.to_transaction.id}
         )`
     )
 }

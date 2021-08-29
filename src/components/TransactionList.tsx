@@ -15,7 +15,7 @@ const TransactionItem = ({ transaction, onPress }: TransactionItemInterface) => 
             bottomDivider
         >
             <Icon
-                name={(transaction.is_income) ? 'attach-money' : 'money-off'} 
+                name={(transaction.is_income) ? 'attach-money' : 'money-off'}
                 type="material-icons"
             />
             <ListItem.Content>
@@ -38,13 +38,13 @@ const TransactionList = () => {
 
     const setTransactionsFromDb = async () => {
         await setTransactions(await getTransactions())
+        console.log('Transactions are:')
+        console.log(transactions)
     }
 
     useEffect(() => {
         if (isFocused) {
             setTransactionsFromDb()
-            console.log('Transactions are:')
-            console.log(transactions)
         }
     }, [isFocused])
 

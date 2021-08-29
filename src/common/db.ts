@@ -3,7 +3,7 @@ import SQLite from 'react-native-sqlite-storage'
 // SQLite.enablePromise(true)
 // SQLite.DEBUG(true)
 
-export default SQLite.openDatabase(
+const db = SQLite.openDatabase(
     {
         name: 'tracke',
         location: 'default'
@@ -11,3 +11,9 @@ export default SQLite.openDatabase(
     () => { },
     error => { console.log(error) }
 )
+
+// Foreign keys are disabled by default in SQLite. So enable it explicitely.
+console.log('Making foreign keys on')
+db.executeSql('PRAGMA foreign_keys = ON')
+
+export default db

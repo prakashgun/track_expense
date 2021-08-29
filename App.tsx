@@ -35,9 +35,13 @@ const Stack = createNativeStackNavigator()
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true)
 
+  const initialSetup = async () => {
+    await createTables()
+    await generateDefaultData()
+  }
+
   useEffect(() => {
-    createTables()
-    generateDefaultData()
+    initialSetup()
   }, [])
 
   return (
