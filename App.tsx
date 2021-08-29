@@ -25,7 +25,7 @@ const theme = {
     placement: 'left',
     leftComponent: { icon: 'menu', color: '#fff' },
     centerComponent: { text: 'MY TITLE', style: { color: '#fff', fontSize: 18 } },
-    rightComponent: { icon: 'home', color: '#fff' },
+    // rightComponent: { icon: 'home', color: '#fff' },
     backgroundColor: '#3e3b33'
   }
 }
@@ -50,15 +50,19 @@ const App = () => {
         {
           isLoggedIn ?
             <Stack.Navigator screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="AccountList" component={AccountList} />
-              <Stack.Screen name="AddAccount" component={AddAccount} />
-              <Stack.Screen name="AccountScreen" component={AccountScreen} />
-              <Stack.Screen name="CategoryList" component={CategoryList} />
-              <Stack.Screen name="AddCategory" component={AddCategory} />
-              <Stack.Screen name="CategoryScreen" component={CategoryScreen} />
+
               <Stack.Screen name="TransactionList" component={TransactionList} />
               <Stack.Screen name="AddTransaction" component={AddTransaction} />
               <Stack.Screen name="TransactionScreen" component={TransactionScreen} />
+
+              <Stack.Screen name="AccountList" component={AccountList} />
+              <Stack.Screen name="AddAccount" component={AddAccount} />
+              <Stack.Screen name="AccountScreen" component={AccountScreen} />
+
+              <Stack.Screen name="CategoryList" component={CategoryList} />
+              <Stack.Screen name="AddCategory" component={AddCategory} />
+              <Stack.Screen name="CategoryScreen" component={CategoryScreen} />
+
               <Stack.Screen name="Menu" component={Menu} />
             </Stack.Navigator>
             : <Text>Please Login</Text>
