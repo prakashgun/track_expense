@@ -60,7 +60,6 @@ const AddCategory = ({ navigation }: any) => {
     const [selectedIcon, setSelectedIcon] = useState(icons[0])
 
     const onIconPress = (icon: { icon_name: string, icon_type: string }) => {
-        console.log('Icon pressed: ', icon)
         setSelectedIcon(icon)
         toggleCategoriesOverlay()
     }

@@ -14,6 +14,11 @@ const TransactionItem = ({ transaction, onPress }: TransactionItemInterface) => 
             key={transaction.id}
             bottomDivider
         >
+            {
+                (transaction.id === transaction.from_id
+                    || transaction.id === transaction.to_id) &&
+                <Icon name="bank-transfer" type="material-community" />
+            }
             <Icon
                 name={(transaction.is_income) ? 'attach-money' : 'money-off'}
                 type="material-icons"
@@ -38,8 +43,8 @@ const TransactionList = () => {
 
     const setTransactionsFromDb = async () => {
         await setTransactions(await getTransactions())
-        console.log('Transactions are:')
-        console.log(transactions)
+        // console.log('Transactions are:')
+        // console.log(transactions)
     }
 
     useEffect(() => {

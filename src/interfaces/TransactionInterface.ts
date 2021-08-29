@@ -32,5 +32,7 @@ export default interface TransactionInterface {
     is_income: boolean,
     account: AccountInterface,
     category: CategoryInterface,
+    from_id?: number,
+    to_id?: number,
     created_at?: string
 }

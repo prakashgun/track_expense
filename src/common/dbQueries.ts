@@ -182,7 +182,9 @@ export const deleteCategory = async (id: number) => {
 
 export const getTransactions = async () => {
     const result: any = await executeQuery(
-        `SELECT * FROM transactions`
+        `SELECT transactions.*, transfers.from_id, transfers.to_id FROM transactions
+            LEFT JOIN transfers 
+                ON transactions.id = transfers.from_id OR transactions.id = transfers.to_id`
     )
 
     const items = []
@@ -201,6 +203,8 @@ export const getTransactions = async () => {
 }
 
 export const addTransaction = async (transaction: TransactionInterface) => {
+    console.log('Adding transaction entry')
+
     return await executeQuery(
         `INSERT INTO transactions (name, value, is_income, account_id, category_id) VALUES (
                 '${transaction.name}', 

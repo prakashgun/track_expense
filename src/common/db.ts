@@ -13,7 +13,6 @@ const db = SQLite.openDatabase(
 )
 
 // Foreign keys are disabled by default in SQLite. So enable it explicitely.
-console.log('Making foreign keys on')
 db.executeSql('PRAGMA foreign_keys = ON')
 
 export default db

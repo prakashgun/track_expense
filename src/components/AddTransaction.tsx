@@ -40,7 +40,6 @@ const AddTransaction = () => {
     }
 
     const onAccountIconPress = (account: AccountInterface) => {
-        console.log('account icon pressed: ', account)
         setSelectedAccount(account)
         setAccountsExpanded(!accountsExpanded)
     }
@@ -50,7 +49,6 @@ const AddTransaction = () => {
     }
 
     const onToAccountIconPress = (account: AccountInterface) => {
-        console.log('to account icon pressed: ', account)
         setSelectedToAccount(account)
         setToAccountsExpanded(!toAccountsExpanded)
     }
@@ -66,7 +64,6 @@ const AddTransaction = () => {
     }
 
     const onCategoryIconPress = (category: CategoryInterface) => {
-        console.log('category icon pressed: ', category)
         setSelectedCategory(category)
         setCategoriesExpanded(!categoriesExpanded)
     }
@@ -76,7 +73,6 @@ const AddTransaction = () => {
     }
 
     const onTypeIconPress = (type: TransactionTypeInterface) => {
-        console.log('type icon pressed: ', type)
         setSelectedType(type)
         setTypesExpanded(!typesExpanded)
     }
