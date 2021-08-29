@@ -4,6 +4,7 @@ import TransactionInterface from "../interfaces/TransactionInterface"
 import TransferInterface from "../interfaces/TransferInterface"
 import db from "./db"
 import { defaultCategories } from "./defaultData"
+import { frameDbDate } from "./utils"
 
 const executeQuery = (sql: string, params = []) => new Promise((resolve, reject) => {
     db.transaction((trans) => {
@@ -180,11 +181,12 @@ export const deleteCategory = async (id: number) => {
     )
 }
 
-export const getTransactions = async () => {
+export const getTransactions = async (date:Date) => {
     const result: any = await executeQuery(
         `SELECT transactions.*, transfers.from_id, transfers.to_id FROM transactions
             LEFT JOIN transfers 
-                ON transactions.id = transfers.from_id OR transactions.id = transfers.to_id`
+                ON transactions.id = transfers.from_id OR transactions.id = transfers.to_id
+            WHERE DATE(transactions.created_at) = '${frameDbDate(date)}'`
     )
 
     const items = []

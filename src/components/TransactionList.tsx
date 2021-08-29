@@ -2,11 +2,20 @@ import { useNavigation } from '@react-navigation/core'
 import { useIsFocused } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
-import { Button, Header, Icon, ListItem } from 'react-native-elements'
+import { Button, FAB, Header, Icon, ListItem, Text } from 'react-native-elements'
 import { getTransactions } from '../common/dbQueries'
 import TransactionInterface from '../interfaces/TransactionInterface'
 import TransactionItemInterface from '../interfaces/TransactionItemInterface'
 
+const DateScroller = ({ currentDate, decreaseDay, increaseDay }: any) => {
+    return (
+        <View style={styles.date_scroller}>
+            <FAB title="-" color="#3e3b33" onPress={decreaseDay} />
+            <Text style={styles.date_scroller_text}>{currentDate.toDateString()}</Text>
+            <FAB title="+" color="#3e3b33" onPress={increaseDay} />
+        </View>
+    )
+}
 
 const TransactionItem = ({ transaction, onPress }: TransactionItemInterface) => (
     <TouchableOpacity onPress={onPress}>
@@ -36,22 +45,37 @@ const TransactionItem = ({ transaction, onPress }: TransactionItemInterface) => 
 )
 
 const TransactionList = () => {
-
     const navigation = useNavigation<any>()
     const [transactions, setTransactions] = useState<TransactionInterface[]>()
+    const [date, setDate] = useState<Date>(new Date())
+    const [count, setCount] = useState(0)
     const isFocused = useIsFocused()
 
-    const setTransactionsFromDb = async () => {
-        await setTransactions(await getTransactions())
-        // console.log('Transactions are:')
-        // console.log(transactions)
+    const setTransactionsFromDb = async (date: Date) => {
+        await setTransactions(await getTransactions(date))
     }
 
     useEffect(() => {
         if (isFocused) {
-            setTransactionsFromDb()
+            setTransactionsFromDb(date)
         }
     }, [isFocused])
+
+    const decreaseDay = () => {
+        console.log('Decresing day')
+        date.setDate(date.getUTCDate() - 1)
+        setDate(date)
+        setCount(count + 1)
+        setTransactionsFromDb(date)
+    }
+
+    const increaseDay = () => {
+        console.log('Increasing day')
+        date.setDate(date.getUTCDate() + 1)
+        setDate(date)
+        setCount(count + 1)
+        setTransactionsFromDb(date)
+    }
 
     return (
         <View style={styles.container}>
@@ -59,6 +83,12 @@ const TransactionList = () => {
                 <Header
                     leftComponent={{ onPress: () => navigation.navigate('Menu') }}
                     centerComponent={{ text: 'Transactions' }}
+                />
+                <DateScroller
+                    currentDate={date}
+                    decreaseDay={decreaseDay}
+                    increaseDay={increaseDay}
+                    count={count}
                 />
                 {
                     transactions && transactions.map((transaction) => (
@@ -82,5 +112,14 @@ export default TransactionList
 const styles = StyleSheet.create({
     container: {
         flex: 1
+    },
+    date_scroller: {
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
+        alignItems: 'center',
+        padding: 10
+    },
+    date_scroller_text: {
+        fontSize: 16
     }
 })
