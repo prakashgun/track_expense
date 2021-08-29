@@ -12,9 +12,12 @@ const TransactionItem = ({ transaction, onPress }: TransactionItemInterface) => 
     <TouchableOpacity onPress={onPress}>
         <ListItem
             key={transaction.id}
-            bottomDivider   
+            bottomDivider
         >
-            <Icon name="bank" type="font-awesome" />
+            <Icon
+                name={(transaction.is_income) ? 'attach-money' : 'money-off'} 
+                type="material-icons"
+            />
             <ListItem.Content>
                 <ListItem.Title>{transaction.category.name}</ListItem.Title>
                 {transaction.name.trim() !== '' && <ListItem.Subtitle>{transaction.name}</ListItem.Subtitle>}
@@ -34,12 +37,14 @@ const TransactionList = () => {
     const isFocused = useIsFocused()
 
     const setTransactionsFromDb = async () => {
-        setTransactions(await getTransactions())
+        await setTransactions(await getTransactions())
     }
 
     useEffect(() => {
         if (isFocused) {
             setTransactionsFromDb()
+            console.log('Transactions are:')
+            console.log(transactions)
         }
     }, [isFocused])
 

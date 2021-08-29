@@ -3,5 +3,5 @@ export default interface CategoryInterface {
     name: string, 
     icon_name: string,
     icon_type: string,
-    created_at?: string
+    createdAt?: string
 }

@@ -2,45 +2,37 @@ import { useIsFocused, useNavigation } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react'
 import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { Button, Header, Icon, Input, ListItem, Overlay } from 'react-native-elements'
-import { addTransaction, getAccounts, getCategories } from '../common/dbQueries'
+import { addTransaction, addTransfer, getAccounts, getCategories, getTransaction } from '../common/dbQueries'
 import AccountInterface from '../interfaces/AccountInterface'
 import CategoryInterface from '../interfaces/CategoryInterface'
-import { TransactionTypes } from '../interfaces/TransactionInterface'
+import { TransactionTypeInterface, types } from '../interfaces/TransactionInterface'
 
 
 const AddTransaction = () => {
     const navigation = useNavigation<any>()
     const [name, setName] = useState<string>('')
     const [value, setValue] = useState<any>()
+
     const [accountsExpanded, setAccountsExpanded] = useState<boolean>(false)
     const [selectedAccount, setSelectedAccount] = useState<AccountInterface>()
+    const [accounts, setAccounts] = useState<AccountInterface[]>()
+
+    const [toAccountsExpanded, setToAccountsExpanded] = useState<boolean>(false)
+    const [selectedToAccount, setSelectedToAccount] = useState<AccountInterface>()
+
+    const [typesExpanded, setTypesExpanded] = useState<boolean>(false)
+    const [selectedType, setSelectedType] = useState<TransactionTypeInterface>(types[0])
+
     const [categoriesExpanded, setCategoriesExpanded] = useState<boolean>(false)
     const [selectedCategory, setSelectedCategory] = useState<CategoryInterface>()
-    const [accounts, setAccounts] = useState<AccountInterface[]>()
     const [categories, setCategories] = useState<CategoryInterface[]>()
     const isFocused = useIsFocused()
 
     const setAccountsFromDb = async () => {
         const allAccounts = await getAccounts()
         setAccounts(allAccounts)
-        await setSelectedAccount(allAccounts[0])
-    }
-
-    const setCategoriesFromDb = async () => {
-        const allCategories = await getCategories()
-        setCategories(allCategories)
-        await setSelectedCategory(allCategories[0])
-    }
-
-    useEffect(() => {
-        if (isFocused) {
-            setAccountsFromDb()
-            setCategoriesFromDb()
-        }
-    }, [isFocused])
-
-    const toggleCategoriesOverlay = () => {
-        setCategoriesExpanded(!categoriesExpanded)
+        setSelectedAccount(allAccounts[0])
+        setSelectedToAccount(allAccounts[0])
     }
 
     const toggleAccountsOverlay = () => {
@@ -53,11 +45,50 @@ const AddTransaction = () => {
         setAccountsExpanded(!accountsExpanded)
     }
 
+    const toggleToAccountsOverlay = () => {
+        setToAccountsExpanded(!toAccountsExpanded)
+    }
+
+    const onToAccountIconPress = (account: AccountInterface) => {
+        console.log('to account icon pressed: ', account)
+        setSelectedToAccount(account)
+        setToAccountsExpanded(!toAccountsExpanded)
+    }
+
+    const setCategoriesFromDb = async () => {
+        const allCategories = await getCategories()
+        setCategories(allCategories)
+        setSelectedCategory(allCategories[0])
+        console.log('Default selected category is:')
+        console.log(allCategories[0])
+    }
+
+    const toggleCategoriesOverlay = () => {
+        setCategoriesExpanded(!categoriesExpanded)
+    }
+
     const onCategoryIconPress = (category: CategoryInterface) => {
         console.log('category icon pressed: ', category)
         setSelectedCategory(category)
         setCategoriesExpanded(!categoriesExpanded)
     }
+
+    const toggleTypesOverlay = () => {
+        setTypesExpanded(!typesExpanded)
+    }
+
+    const onTypeIconPress = (type: TransactionTypeInterface) => {
+        console.log('type icon pressed: ', type)
+        setSelectedType(type)
+        setTypesExpanded(!typesExpanded)
+    }
+
+    useEffect(() => {
+        if (isFocused) {
+            setAccountsFromDb()
+            setCategoriesFromDb()
+        }
+    }, [isFocused])
 
     const onAddItemPress = async () => {
         if (!value) {
@@ -75,13 +106,40 @@ const AddTransaction = () => {
             return
         }
 
-        await addTransaction({
+        const queryResult: any = await addTransaction({
             name: name,
             value: value,
-            type: TransactionTypes.expense,
+            is_income: (selectedType.name === 'Income') ? true : false,
             account: selectedAccount,
             category: selectedCategory
         })
+
+        if (selectedType.name === 'Transfer') {
+
+            if (!selectedToAccount) {
+                Alert.alert('To Account must be selected')
+                return
+            }
+
+            if (selectedAccount === selectedToAccount) {
+                Alert.alert('From and To Account cannot be the same')
+                return
+            }
+
+            const secondQueryResult: any = await addTransaction({
+                name: name,
+                value: value,
+                is_income: true,
+                account: selectedToAccount,
+                category: selectedCategory
+            })
+
+            await addTransfer({
+                from_transaction: await getTransaction(queryResult['insertId']),
+                to_transaction: await getTransaction(secondQueryResult['insertId'])
+            })
+
+        }
 
         console.log('Transaction saved')
         navigation.goBack()
@@ -93,6 +151,27 @@ const AddTransaction = () => {
                 leftComponent={{ onPress: () => navigation.navigate('Menu') }}
                 centerComponent={{ text: 'Add Transaction' }}
             />
+            <TouchableOpacity onPress={toggleTypesOverlay}>
+                {selectedType && <Input
+                    placeholder={selectedType.name}
+                    leftIcon={{ type: selectedType.icon_type, name: selectedType.icon_name }}
+                    onChangeText={() => console.log('Type selected')}
+                    style={styles.input}
+                    disabled
+                />}
+            </TouchableOpacity>
+            <Overlay fullScreen={true} isVisible={typesExpanded} onBackdropPress={toggleTypesOverlay}>
+                <ScrollView>
+                    {types && types.map((type, i) => (
+                        <ListItem key={i} onPress={() => onTypeIconPress(type)} bottomDivider>
+                            <Icon name={type.icon_name} type={type.icon_type} />
+                            <ListItem.Content>
+                                <ListItem.Title>{type.name}</ListItem.Title>
+                            </ListItem.Content>
+                        </ListItem>
+                    ))}
+                </ScrollView>
+            </Overlay>
             <Input
                 placeholder="Value"
                 leftIcon={{ type: 'material-icons', name: 'account-balance-wallet' }}
@@ -141,9 +220,32 @@ const AddTransaction = () => {
                     ))}
                 </ScrollView>
             </Overlay>
+            {selectedType.name === 'Transfer' && <View>
+                <TouchableOpacity onPress={toggleToAccountsOverlay}>
+                    {selectedToAccount && <Input
+                        placeholder={selectedToAccount.name}
+                        leftIcon={{ type: "font-awesome", name: "bank" }}
+                        onChangeText={() => console.log('ToAccount selected')}
+                        style={styles.input}
+                        disabled
+                    />}
+                </TouchableOpacity>
+                <Overlay fullScreen={true} isVisible={toAccountsExpanded} onBackdropPress={toggleToAccountsOverlay}>
+                    <ScrollView>
+                        {accounts && accounts.map((account, i) => (
+                            <ListItem key={i} onPress={() => onToAccountIconPress(account)} bottomDivider>
+                                <Icon name="bank" type="font-awesome" />
+                                <ListItem.Content>
+                                    <ListItem.Title>{account.name}</ListItem.Title>
+                                </ListItem.Content>
+                            </ListItem>
+                        ))}
+                    </ScrollView>
+                </Overlay>
+            </View>}
             <Input
-                placeholder="Name (Optional)"
-                leftIcon={{ type: 'font-awesome', name: 'bank' }}
+                placeholder="Note (Optional)"
+                leftIcon={{ type: 'font-awesome', name: 'sticky-note' }}
                 onChangeText={setName}
             />
             <Button title="Save" onPress={onAddItemPress} />
