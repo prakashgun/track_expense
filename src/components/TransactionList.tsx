@@ -47,7 +47,7 @@ const TransactionItem = ({ transaction, onPress }: TransactionItemInterface) => 
 const TransactionList = () => {
     const navigation = useNavigation<any>()
     const [transactions, setTransactions] = useState<TransactionInterface[]>()
-    const [date, setDate] = useState<Date>(new Date())
+    const [transactionDate, setTransactionDate] = useState<Date>(new Date())
     const [count, setCount] = useState(0)
     const isFocused = useIsFocused()
 
@@ -57,24 +57,24 @@ const TransactionList = () => {
 
     useEffect(() => {
         if (isFocused) {
-            setTransactionsFromDb(date)
+            setTransactionsFromDb(transactionDate)
         }
     }, [isFocused])
 
     const decreaseDay = () => {
         console.log('Decresing day')
-        date.setDate(date.getUTCDate() - 1)
-        setDate(date)
+        transactionDate.setDate(transactionDate.getUTCDate() - 1)
+        setTransactionDate(transactionDate)
         setCount(count + 1)
-        setTransactionsFromDb(date)
+        setTransactionsFromDb(transactionDate)
     }
 
     const increaseDay = () => {
         console.log('Increasing day')
-        date.setDate(date.getUTCDate() + 1)
-        setDate(date)
+        transactionDate.setDate(transactionDate.getUTCDate() + 1)
+        setTransactionDate(transactionDate)
         setCount(count + 1)
-        setTransactionsFromDb(date)
+        setTransactionsFromDb(transactionDate)
     }
 
     return (
@@ -85,7 +85,7 @@ const TransactionList = () => {
                     centerComponent={{ text: 'Transactions' }}
                 />
                 <DateScroller
-                    currentDate={date}
+                    currentDate={transactionDate}
                     decreaseDay={decreaseDay}
                     increaseDay={increaseDay}
                     count={count}
@@ -102,7 +102,7 @@ const TransactionList = () => {
                     ))
                 }
             </ScrollView>
-            <Button title="Add" onPress={() => navigation.navigate('AddTransaction')} />
+            <Button title="Add" onPress={() => navigation.navigate('AddTransaction', {transactionDate: transactionDate.toISOString()})} />
         </View>
     )
 }

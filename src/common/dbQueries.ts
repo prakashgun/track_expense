@@ -4,7 +4,7 @@ import TransactionInterface from "../interfaces/TransactionInterface"
 import TransferInterface from "../interfaces/TransferInterface"
 import db from "./db"
 import { defaultCategories } from "./defaultData"
-import { frameDbDate } from "./utils"
+import { frameDbDate, frameDbDateTime } from "./utils"
 
 const executeQuery = (sql: string, params = []) => new Promise((resolve, reject) => {
     db.transaction((trans) => {
@@ -68,6 +68,7 @@ export const createTables = async () => {
             is_income BOOLEAN DEFAULT(FALSE),
             account_id INTEGER NOT NULL,
             category_id INTEGER NOT NULL,
+            transaction_date DATETIME NOT NULL,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY(account_id) REFERENCES accounts(id) ON DELETE CASCADE,
             FOREIGN KEY(category_id) REFERENCES categories(id) ON DELETE CASCADE
@@ -181,12 +182,12 @@ export const deleteCategory = async (id: number) => {
     )
 }
 
-export const getTransactions = async (date:Date) => {
+export const getTransactions = async (date: Date) => {
     const result: any = await executeQuery(
         `SELECT transactions.*, transfers.from_id, transfers.to_id FROM transactions
             LEFT JOIN transfers 
                 ON transactions.id = transfers.from_id OR transactions.id = transfers.to_id
-            WHERE DATE(transactions.created_at) = '${frameDbDate(date)}'`
+            WHERE DATE(transactions.transaction_date) = '${frameDbDate(date)}'`
     )
 
     const items = []
@@ -208,10 +209,11 @@ export const addTransaction = async (transaction: TransactionInterface) => {
     console.log('Adding transaction entry')
 
     return await executeQuery(
-        `INSERT INTO transactions (name, value, is_income, account_id, category_id) VALUES (
+        `INSERT INTO transactions (name, value, is_income, transaction_date, account_id, category_id) VALUES (
                 '${transaction.name}', 
                 ${transaction.value}, 
                 ${transaction.is_income},
+                '${frameDbDateTime(transaction.transaction_date)}',
                 ${transaction.account.id},
                 ${transaction.category.id}
         )`

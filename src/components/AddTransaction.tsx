@@ -8,10 +8,10 @@ import CategoryInterface from '../interfaces/CategoryInterface'
 import { TransactionTypeInterface, types } from '../interfaces/TransactionInterface'
 
 
-const AddTransaction = () => {
-    const navigation = useNavigation<any>()
+const AddTransaction = ({navigation, route}:any) => {
     const [name, setName] = useState<string>('')
     const [value, setValue] = useState<any>()
+    const transactionDate:Date = new Date(route.params.transactionDate)
 
     const [accountsExpanded, setAccountsExpanded] = useState<boolean>(false)
     const [selectedAccount, setSelectedAccount] = useState<AccountInterface>()
@@ -105,7 +105,8 @@ const AddTransaction = () => {
             value: value,
             is_income: (selectedType.name === 'Income') ? true : false,
             account: selectedAccount,
-            category: selectedCategory
+            category: selectedCategory,
+            transaction_date: transactionDate
         })
 
         if (selectedType.name === 'Transfer') {
@@ -125,7 +126,8 @@ const AddTransaction = () => {
                 value: value,
                 is_income: true,
                 account: selectedToAccount,
-                category: selectedCategory
+                category: selectedCategory,
+                transaction_date: transactionDate
             })
 
             await addTransfer({
