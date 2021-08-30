@@ -2,20 +2,11 @@ import { useNavigation } from '@react-navigation/core'
 import { useIsFocused } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
-import { Button, FAB, Header, Icon, ListItem, Text } from 'react-native-elements'
+import DatePicker from 'react-native-date-picker'
+import { Button, Header, Icon, ListItem } from 'react-native-elements'
 import { getTransactions } from '../common/dbQueries'
 import TransactionInterface from '../interfaces/TransactionInterface'
 import TransactionItemInterface from '../interfaces/TransactionItemInterface'
-
-const DateScroller = ({ currentDate, decreaseDay, increaseDay }: any) => {
-    return (
-        <View style={styles.date_scroller}>
-            <FAB title="-" color="#3e3b33" onPress={decreaseDay} />
-            <Text style={styles.date_scroller_text}>{currentDate.toDateString()}</Text>
-            <FAB title="+" color="#3e3b33" onPress={increaseDay} />
-        </View>
-    )
-}
 
 const TransactionItem = ({ transaction, onPress }: TransactionItemInterface) => (
     <TouchableOpacity onPress={onPress}>
@@ -52,6 +43,7 @@ const TransactionList = () => {
     const isFocused = useIsFocused()
 
     const setTransactionsFromDb = async (date: Date) => {
+        setTransactionDate(date)
         await setTransactions(await getTransactions(date))
     }
 
@@ -61,22 +53,6 @@ const TransactionList = () => {
         }
     }, [isFocused])
 
-    const decreaseDay = () => {
-        console.log('Decresing day')
-        transactionDate.setDate(transactionDate.getUTCDate() - 1)
-        setTransactionDate(transactionDate)
-        setCount(count + 1)
-        setTransactionsFromDb(transactionDate)
-    }
-
-    const increaseDay = () => {
-        console.log('Increasing day')
-        transactionDate.setDate(transactionDate.getUTCDate() + 1)
-        setTransactionDate(transactionDate)
-        setCount(count + 1)
-        setTransactionsFromDb(transactionDate)
-    }
-
     return (
         <View style={styles.container}>
             <ScrollView >
@@ -84,12 +60,7 @@ const TransactionList = () => {
                     leftComponent={{ onPress: () => navigation.navigate('Menu') }}
                     centerComponent={{ text: 'Transactions' }}
                 />
-                <DateScroller
-                    currentDate={transactionDate}
-                    decreaseDay={decreaseDay}
-                    increaseDay={increaseDay}
-                    count={count}
-                />
+                <DatePicker mode="date" androidVariant="nativeAndroid" date={transactionDate} onDateChange={setTransactionsFromDb} />
                 {
                     transactions && transactions.map((transaction) => (
                         <TransactionItem
@@ -102,7 +73,7 @@ const TransactionList = () => {
                     ))
                 }
             </ScrollView>
-            <Button title="Add" onPress={() => navigation.navigate('AddTransaction', {transactionDate: transactionDate.toISOString()})} />
+            <Button title="Add" onPress={() => navigation.navigate('AddTransaction', { transactionDate: transactionDate.toISOString() })} />
         </View>
     )
 }
