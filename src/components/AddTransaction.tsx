@@ -1,17 +1,17 @@
 import { useIsFocused, useNavigation } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react'
 import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
-import { Button, Header, Icon, Input, ListItem, Overlay } from 'react-native-elements'
+import { Button, Header, Icon, Input, ListItem, Overlay, Text } from 'react-native-elements'
 import { addTransaction, addTransfer, getAccounts, getCategories, getTransaction } from '../common/dbQueries'
 import AccountInterface from '../interfaces/AccountInterface'
 import CategoryInterface from '../interfaces/CategoryInterface'
 import { TransactionTypeInterface, types } from '../interfaces/TransactionInterface'
 
 
-const AddTransaction = ({navigation, route}:any) => {
+const AddTransaction = ({ navigation, route }: any) => {
     const [name, setName] = useState<string>('')
     const [value, setValue] = useState<any>()
-    const transactionDate:Date = new Date(route.params.transactionDate)
+    const transactionDate: Date = new Date(route.params.transactionDate)
 
     const [accountsExpanded, setAccountsExpanded] = useState<boolean>(false)
     const [selectedAccount, setSelectedAccount] = useState<AccountInterface>()
@@ -149,14 +149,16 @@ const AddTransaction = ({navigation, route}:any) => {
             />
             <TouchableOpacity onPress={toggleTypesOverlay}>
                 {selectedType && <Input
-                    placeholder={selectedType.name}
+                    placeholder={`Type: ${selectedType.name}`}
                     leftIcon={{ type: selectedType.icon_type, name: selectedType.icon_name }}
                     onChangeText={() => console.log('Type selected')}
                     style={styles.input}
                     disabled
+                    disabledInputStyle={styles.disabled_input}
                 />}
             </TouchableOpacity>
             <Overlay fullScreen={true} isVisible={typesExpanded} onBackdropPress={toggleTypesOverlay}>
+                <Text h4>Select Type</Text>
                 <ScrollView>
                     {types && types.map((type, i) => (
                         <ListItem key={i} onPress={() => onTypeIconPress(type)} bottomDivider>
@@ -176,14 +178,16 @@ const AddTransaction = ({navigation, route}:any) => {
             />
             <TouchableOpacity onPress={toggleCategoriesOverlay}>
                 {selectedCategory && <Input
-                    placeholder={selectedCategory.name}
+                    placeholder={`Category: ${selectedCategory.name}`}
                     leftIcon={{ type: selectedCategory.icon_type, name: selectedCategory.icon_name }}
                     onChangeText={() => console.log('Catgeory selected')}
                     style={styles.input}
                     disabled
+                    disabledInputStyle={styles.disabled_input}
                 />}
             </TouchableOpacity>
             <Overlay fullScreen={true} isVisible={categoriesExpanded} onBackdropPress={toggleCategoriesOverlay}>
+                <Text h4>Select Category</Text>
                 <ScrollView>
                     {categories && categories.map((category, i) => (
                         <ListItem key={i} onPress={() => onCategoryIconPress(category)} bottomDivider>
@@ -197,14 +201,16 @@ const AddTransaction = ({navigation, route}:any) => {
             </Overlay>
             <TouchableOpacity onPress={toggleAccountsOverlay}>
                 {selectedAccount && <Input
-                    placeholder={selectedAccount.name}
+                    placeholder={`Account: ${selectedAccount.name}`}
                     leftIcon={{ type: "font-awesome", name: "bank" }}
                     onChangeText={() => console.log('Account selected')}
                     style={styles.input}
                     disabled
+                    disabledInputStyle={styles.disabled_input}
                 />}
             </TouchableOpacity>
             <Overlay fullScreen={true} isVisible={accountsExpanded} onBackdropPress={toggleAccountsOverlay}>
+                <Text h4>Select Account</Text>
                 <ScrollView>
                     {accounts && accounts.map((account, i) => (
                         <ListItem key={i} onPress={() => onAccountIconPress(account)} bottomDivider>
@@ -255,5 +261,8 @@ const styles = StyleSheet.create({
     container: {
         flex: 1
     },
-    input: {}
+    input: {},
+    disabled_input: {
+        opacity: 1
+    }
 })
