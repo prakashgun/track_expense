@@ -19,7 +19,7 @@ const AccountItem = ({ account, onPress }: AccountItemInterface) => (
                 <ListItem.Title>{account.name}</ListItem.Title>
             </ListItem.Content>
             <ListItem.Content right>
-                <ListItem.Title>{account.balance}</ListItem.Title>
+                <ListItem.Title>{account.initial_balance}</ListItem.Title>
             </ListItem.Content>
         </ListItem>
     </TouchableOpacity>

@@ -1,6 +1,6 @@
 export default interface AccountInterface {
     id?: number,
     name: string,
-    balance: number,
+    initial_balance: number,
     created_at?: Date
 }

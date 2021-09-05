@@ -24,7 +24,7 @@ const AddAccount = () => {
 
         await addAccount({
             name: name,
-            balance: balance
+            initial_balance: balance
         })
 
         console.log('Account saved')

@@ -45,7 +45,7 @@ export const createTables = async () => {
         `CREATE TABLE IF NOT EXISTS accounts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL UNIQUE,
-            balance REAL NOT NULL,
+            initial_balance REAL NOT NULL,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
         )`
     )
@@ -97,7 +97,7 @@ export const generateDefaultData = async () => {
         console.log('Generating default accounts')
 
         await executeQuery(
-            `INSERT INTO accounts (name, balance) VALUES ('Cash', 0)`
+            `INSERT INTO accounts (name, initial_balance) VALUES ('Cash', 0)`
         )
     }
 
@@ -135,7 +135,7 @@ export const getAccounts = async (): Promise<AccountInterface[]> => {
 
 export const addAccount = async (account: AccountInterface) => {
     await executeQuery(
-        `INSERT INTO accounts (name, balance) VALUES ('${account.name}', ${account.balance})`
+        `INSERT INTO accounts (name, initial_balance) VALUES ('${account.name}', ${account.initial_balance})`
     )
 }
 

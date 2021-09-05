@@ -52,7 +52,7 @@ const AccountScreen = ({ navigation, route }: any) => {
             {account && <PricingCard
                 color="#3e3b33"
                 title={account.name}
-                price={account.balance}
+                price={account.initial_balance}
                 button={{ title: 'Delete', onPress: () => onDeleteItemPress() }}
             />}
         </View>
