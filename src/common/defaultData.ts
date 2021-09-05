@@ -45,6 +45,16 @@ export const defaultCategories = [
         icon_type: 'material-icons'
     },
     {
+        name: 'General Transfer',
+        icon_name: 'transfer',
+        icon_type: 'material-community'
+    },
+    {
+        name: 'ATM',
+        icon_name: 'local-atm',
+        icon_type: 'material-icons'
+    },
+    {
         name: 'Others',
         icon_name: 'miscellaneous-services',
         icon_type: 'material-icons'

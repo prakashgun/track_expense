@@ -125,7 +125,7 @@ export const generateDefaultData = async () => {
     }
 }
 
-export const getAccounts = async () => {
+export const getAccounts = async (): Promise<AccountInterface[]> => {
     const result: any = await executeQuery(
         `SELECT * FROM accounts`
     )
@@ -153,7 +153,7 @@ export const deleteAccount = async (id: number) => {
     )
 }
 
-export const getCategories = async () => {
+export const getCategories = async (): Promise<CategoryInterface[]> => {
     const result: any = await executeQuery(
         `SELECT * FROM categories`
     )
@@ -226,22 +226,6 @@ export const addTransaction = async (transaction: TransactionInterface) => {
                 ${transaction.account.id},
                 ${transaction.category.id}
         )`
-    )
-}
-
-export const editTransaction = async (transaction: TransactionInterface) => {
-    console.log('Editing transaction entry')
-
-    return await executeQuery(
-        `UPDATE transactions SET 
-                name = '${transaction.name}', 
-                value = ${transaction.value}, 
-                is_income = ${transaction.is_income},
-                transaction_date = '${frameDbDateTime(transaction.transaction_date)}',
-                account_id = ${transaction.account.id},
-                category_id = ${transaction.category.id}
-            WHERE id = ${transaction.id}
-        `
     )
 }
 
