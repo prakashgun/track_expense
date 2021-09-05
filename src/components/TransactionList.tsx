@@ -28,7 +28,9 @@ const TransactionItem = ({ transaction, onPress }: TransactionItemInterface) => 
                 {transaction.name.trim() !== '' && <ListItem.Subtitle>{transaction.name}</ListItem.Subtitle>}
             </ListItem.Content>
             <ListItem.Content right>
-                <ListItem.Title>{transaction.value}</ListItem.Title>
+                <ListItem.Title style={{ color: (transaction.is_income) ? 'green' : 'red' }}>
+                    {transaction.value}
+                </ListItem.Title>
                 <ListItem.Subtitle>{transaction.account.name}</ListItem.Subtitle>
             </ListItem.Content>
         </ListItem>
@@ -39,7 +41,6 @@ const TransactionList = () => {
     const navigation = useNavigation<any>()
     const [transactions, setTransactions] = useState<TransactionInterface[]>()
     const [transactionDate, setTransactionDate] = useState<Date>(new Date())
-    const [count, setCount] = useState(0)
     const isFocused = useIsFocused()
 
     const setTransactionsFromDb = async (date: Date) => {
