@@ -33,7 +33,7 @@ export default interface TransactionInterface {
     account: AccountInterface,
     category: CategoryInterface,
     transaction_date: Date,
-    from_id?: number,
-    to_id?: number,
+    from_transaction?: TransactionInterface,
+    to_transaction?: TransactionInterface,
     created_at?: Date
 }

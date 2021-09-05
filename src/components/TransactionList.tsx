@@ -15,8 +15,8 @@ const TransactionItem = ({ transaction, onPress }: TransactionItemInterface) => 
             bottomDivider
         >
             {
-                (transaction.id === transaction.from_id
-                    || transaction.id === transaction.to_id) &&
+                (transaction.id === transaction.from_transaction?.id
+                    || transaction.id === transaction.to_transaction?.id) &&
                 <Icon name="bank-transfer" type="material-community" />
             }
             <Icon
@@ -67,7 +67,7 @@ const TransactionList = () => {
                             transaction={transaction}
                             key={transaction.id}
                             onPress={() => {
-                                return navigation.navigate('TransactionScreen', { id: transaction.id })
+                                return navigation.navigate('EditTransaction', { id: transaction.id, transactionDate: transactionDate.toISOString() })
                             }}
                         />
                     ))

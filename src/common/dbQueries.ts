@@ -182,7 +182,7 @@ export const deleteCategory = async (id: number) => {
     )
 }
 
-export const getTransactions = async (date: Date) => {
+export const getTransactions = async (date: Date): Promise<TransactionInterface[]> => {
     const result: any = await executeQuery(
         `SELECT transactions.*, transfers.from_id, transfers.to_id FROM transactions
             LEFT JOIN transfers 
@@ -193,12 +193,21 @@ export const getTransactions = async (date: Date) => {
     const items = []
     const rows = result.rows
 
+
     for (let i = 0; i < rows.length; i++) {
         let item = rows.item(i)
         item['account'] = await getAccount(item['account_id'])
         delete item['account_id']
         item['category'] = await getCategory(item['category_id'])
         delete item['category_id']
+        if (item['from_id']) {
+            item['from_transaction'] = await getTransaction(item['from_id'])
+            delete item['from_id']
+        }
+        if (item['to_id']) {
+            item['to_transaction'] = await getTransaction(item['to_id'])
+            delete item['to_id']
+        }
         items.push(item)
     }
 
@@ -220,17 +229,38 @@ export const addTransaction = async (transaction: TransactionInterface) => {
     )
 }
 
+export const editTransaction = async (transaction: TransactionInterface) => {
+    console.log('Editing transaction entry')
+
+    return await executeQuery(
+        `UPDATE transactions SET 
+                name = '${transaction.name}', 
+                value = ${transaction.value}, 
+                is_income = ${transaction.is_income},
+                transaction_date = '${frameDbDateTime(transaction.transaction_date)}',
+                account_id = ${transaction.account.id},
+                category_id = ${transaction.category.id}
+            WHERE id = ${transaction.id}
+        `
+    )
+}
+
 export const getTransaction = async (id: number): Promise<TransactionInterface> => {
     const result: any = await executeQuery(
         `SELECT * FROM transactions WHERE id=${id}`
     )
+    let item = result.rows.item(0)
+    item['account'] = await getAccount(item['account_id'])
+    delete item['account_id']
+    item['category'] = await getCategory(item['category_id'])
+    delete item['category_id']
 
-    return itemFromResult(result)
+    return item
 }
 
-export const deleteTransaction = async (id: number) => {
+export const deleteTransaction = async (transaction: TransactionInterface) => {
     await executeQuery(
-        `DELETE FROM transactions WHERE id=${id}`
+        `DELETE FROM transactions WHERE id=${transaction.id}`
     )
 }
 
@@ -240,4 +270,25 @@ export const addTransfer = async (transfer: TransferInterface) => {
             ${transfer.from_transaction.id}, ${transfer.to_transaction.id}
         )`
     )
+}
+
+export const getTransfer = async (transaction: TransactionInterface): Promise<TransferInterface | undefined> => {
+    const result: any = await executeQuery(
+        `SELECT * FROM transfers WHERE from_id = ${transaction.id} or to_id = ${transaction.id}`
+    )
+
+    const rows = result.rows
+
+    let item = rows.item(0)
+
+    if (!item) {
+        return
+    }
+
+    item['from_transaction'] = await getTransaction(item['from_id'])
+    delete item['from_id']
+    item['to_transaction'] = await getTransaction(item['to_id'])
+    delete item['to_id']
+
+    return item
 }

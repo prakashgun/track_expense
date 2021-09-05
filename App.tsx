@@ -11,6 +11,7 @@ import AddCategory from './src/components/AddCategory'
 import AddTransaction from './src/components/AddTransaction'
 import CategoryList from './src/components/CategoryList'
 import CategoryScreen from './src/components/CategoryScreen'
+import EditTransaction from './src/components/EditTransaction'
 import Menu from './src/components/Menu'
 import TransactionList from './src/components/TransactionList'
 import TransactionScreen from './src/components/TransactionScreen'
@@ -53,6 +54,7 @@ const App = () => {
 
               <Stack.Screen name="TransactionList" component={TransactionList} />
               <Stack.Screen name="AddTransaction" component={AddTransaction} />
+              <Stack.Screen name="EditTransaction" component={EditTransaction} />
               <Stack.Screen name="TransactionScreen" component={TransactionScreen} />
 
               <Stack.Screen name="AccountList" component={AccountList} />
