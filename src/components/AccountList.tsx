@@ -8,8 +8,18 @@ import AccountInterface from '../interfaces/AccountInterface'
 import AccountItemInterface from '../interfaces/AccountItemInterface'
 
 
-const AccountItem = ({ account, onPress }: AccountItemInterface) => (
-    <TouchableOpacity onPress={onPress}>
+const AccountItem = ({ account, onPress }: AccountItemInterface) => {
+    const [currentBalance, setCurrentBalance] = useState(0)
+
+    useEffect(() => {
+        if (account.total_income === undefined || account.total_expense === undefined) {
+            return
+        }
+
+        setCurrentBalance(account.initial_balance + account.total_income - account.total_expense)
+    }, [account])
+
+    return < TouchableOpacity onPress={onPress} >
         <ListItem
             key={account.id}
             bottomDivider
@@ -19,11 +29,11 @@ const AccountItem = ({ account, onPress }: AccountItemInterface) => (
                 <ListItem.Title>{account.name}</ListItem.Title>
             </ListItem.Content>
             <ListItem.Content right>
-                <ListItem.Title>{account.initial_balance}</ListItem.Title>
+                <ListItem.Title>{currentBalance}</ListItem.Title>
             </ListItem.Content>
         </ListItem>
-    </TouchableOpacity>
-)
+    </TouchableOpacity >
+}
 
 const AccountList = () => {
 

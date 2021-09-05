@@ -34,6 +34,18 @@ const itemFromResult = (result: any) => {
     return result.rows.item(0)
 }
 
+const sumFromResult = (result: any) => {
+    const rows = result.rows
+    let item = rows.item(0)
+    let sum = 0
+
+    if(!item['sum(value)']){
+        return sum
+    }
+
+    return parseFloat(item['sum(value)'])
+}
+
 export const createTables = async () => {
     // console.log('Dropping tables')
     // await executeQuery('DROP TABLE IF EXISTS accounts')
@@ -130,7 +142,18 @@ export const getAccounts = async (): Promise<AccountInterface[]> => {
         `SELECT * FROM accounts`
     )
 
-    return itemsFromResult(result)
+    const items = []
+    const rows = result.rows
+
+
+    for (let i = 0; i < rows.length; i++) {
+        let item = rows.item(i)
+        item['total_expense'] = await getTotalExpense(item)
+        item['total_income'] = await getTotalIncome(item)
+        items.push(item)
+    }
+
+    return items
 }
 
 export const addAccount = async (account: AccountInterface) => {
@@ -275,4 +298,20 @@ export const getTransfer = async (transaction: TransactionInterface): Promise<Tr
     delete item['to_id']
 
     return item
+}
+
+export const getTotalExpense = async (account: AccountInterface): Promise<number> => {
+    const result: any = await executeQuery(
+        `SELECT sum(value) FROM transactions WHERE account_id = ${account.id} AND is_income = 0`
+    )
+
+    return sumFromResult(result)
+}
+
+export const getTotalIncome = async (account: AccountInterface): Promise<number> => {
+    const result: any = await executeQuery(
+        `SELECT sum(value) FROM transactions WHERE account_id = ${account.id} AND is_income = 1`
+    )
+
+    return sumFromResult(result)
 }
