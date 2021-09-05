@@ -1,4 +1,4 @@
-import { useIsFocused, useNavigation } from '@react-navigation/native'
+import { useIsFocused } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react'
 import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { Button, Header, Icon, Input, ListItem, Overlay, Text } from 'react-native-elements'
@@ -6,6 +6,7 @@ import { addTransaction, addTransfer, getAccounts, getCategories, getTransaction
 import AccountInterface from '../interfaces/AccountInterface'
 import CategoryInterface from '../interfaces/CategoryInterface'
 import { TransactionTypeInterface, types } from '../interfaces/TransactionInterface'
+import CategorySelect from './CategorySelect'
 
 
 const AddTransaction = ({ navigation, route }: any) => {
@@ -23,7 +24,6 @@ const AddTransaction = ({ navigation, route }: any) => {
     const [typesExpanded, setTypesExpanded] = useState<boolean>(false)
     const [selectedType, setSelectedType] = useState<TransactionTypeInterface>(types[0])
 
-    const [categoriesExpanded, setCategoriesExpanded] = useState<boolean>(false)
     const [selectedCategory, setSelectedCategory] = useState<CategoryInterface>()
     const [categories, setCategories] = useState<CategoryInterface[]>()
     const isFocused = useIsFocused()
@@ -57,15 +57,6 @@ const AddTransaction = ({ navigation, route }: any) => {
         const allCategories = await getCategories()
         setCategories(allCategories)
         setSelectedCategory(allCategories[0])
-    }
-
-    const toggleCategoriesOverlay = () => {
-        setCategoriesExpanded(!categoriesExpanded)
-    }
-
-    const onCategoryIconPress = (category: CategoryInterface) => {
-        setSelectedCategory(category)
-        setCategoriesExpanded(!categoriesExpanded)
     }
 
     const toggleTypesOverlay = () => {
@@ -176,29 +167,11 @@ const AddTransaction = ({ navigation, route }: any) => {
                 keyboardType="numeric"
                 onChangeText={setValue}
             />
-            <TouchableOpacity onPress={toggleCategoriesOverlay}>
-                {selectedCategory && <Input
-                    placeholder={`Category: ${selectedCategory.name}`}
-                    leftIcon={{ type: selectedCategory.icon_type, name: selectedCategory.icon_name }}
-                    onChangeText={() => console.log('Catgeory selected')}
-                    style={styles.input}
-                    disabled
-                    disabledInputStyle={styles.disabled_input}
-                />}
-            </TouchableOpacity>
-            <Overlay fullScreen={true} isVisible={categoriesExpanded} onBackdropPress={toggleCategoriesOverlay}>
-                <Text h4>Select Category</Text>
-                <ScrollView>
-                    {categories && categories.map((category, i) => (
-                        <ListItem key={i} onPress={() => onCategoryIconPress(category)} bottomDivider>
-                            <Icon name={category.icon_name} type={category.icon_type} />
-                            <ListItem.Content>
-                                <ListItem.Title>{category.name}</ListItem.Title>
-                            </ListItem.Content>
-                        </ListItem>
-                    ))}
-                </ScrollView>
-            </Overlay>
+            {categories && selectedCategory && <CategorySelect
+                categories={categories}
+                selectedCategory={selectedCategory}
+                setSelectedCategory={setSelectedCategory}
+            />}
             <TouchableOpacity onPress={toggleAccountsOverlay}>
                 {selectedAccount && <Input
                     placeholder={`Account: ${selectedAccount.name}`}
