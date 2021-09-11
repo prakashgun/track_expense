@@ -36,8 +36,6 @@ const EditTransaction = ({ navigation, route }: any) => {
     const setAccountsFromDb = async () => {
         const allAccounts = await getAccounts()
         setAccounts(allAccounts)
-        setSelectedAccount(allAccounts[0])
-        setSelectedToAccount(allAccounts[0])
     }
 
     const toggleAccountsOverlay = () => {
