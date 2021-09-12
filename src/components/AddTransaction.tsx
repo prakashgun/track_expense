@@ -1,28 +1,24 @@
 import { useIsFocused } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react'
-import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
-import { Button, Header, Icon, Input, ListItem, Overlay, Text } from 'react-native-elements'
+import { Alert, StyleSheet, View } from 'react-native'
+import { Button, Header, Input } from 'react-native-elements'
 import { addTransaction, addTransfer, getAccounts, getCategories, getTransaction } from '../common/dbQueries'
 import AccountInterface from '../interfaces/AccountInterface'
 import CategoryInterface from '../interfaces/CategoryInterface'
 import TransactionTypeInterface, { transactionTypes } from '../interfaces/TransactionTypeInterface'
 import AccountSelect from './AccountSelect'
 import CategorySelect from './CategorySelect'
+import TransactionTypeSelect from './TransactionTypeSelect'
 
 
 const AddTransaction = ({ navigation, route }: any) => {
     const [name, setName] = useState<string>('')
     const [value, setValue] = useState<any>()
     const transactionDate: Date = new Date(route.params.transactionDate)
-
     const [selectedAccount, setSelectedAccount] = useState<AccountInterface>()
     const [accounts, setAccounts] = useState<AccountInterface[]>()
-
     const [selectedToAccount, setSelectedToAccount] = useState<AccountInterface>()
-
-    const [transactionTypesExpanded, setTransactionTypesExpanded] = useState<boolean>(false)
     const [selectedTransactionType, setSelectedTransactionType] = useState<TransactionTypeInterface>(transactionTypes[0])
-
     const [selectedCategory, setSelectedCategory] = useState<CategoryInterface>()
     const [categories, setCategories] = useState<CategoryInterface[]>()
     const isFocused = useIsFocused()
@@ -38,15 +34,6 @@ const AddTransaction = ({ navigation, route }: any) => {
         const allCategories = await getCategories()
         setCategories(allCategories)
         setSelectedCategory(allCategories[0])
-    }
-
-    const toggleTypesOverlay = () => {
-        setTransactionTypesExpanded(!transactionTypesExpanded)
-    }
-
-    const onTypeIconPress = (type: TransactionTypeInterface) => {
-        setSelectedTransactionType(type)
-        setTransactionTypesExpanded(!transactionTypesExpanded)
     }
 
     useEffect(() => {
@@ -119,29 +106,12 @@ const AddTransaction = ({ navigation, route }: any) => {
                 leftComponent={{ onPress: () => navigation.navigate('Menu') }}
                 centerComponent={{ text: 'Add Transaction' }}
             />
-            <TouchableOpacity onPress={toggleTypesOverlay}>
-                {selectedTransactionType && <Input
-                    placeholder={`Type: ${selectedTransactionType.name}`}
-                    leftIcon={{ type: selectedTransactionType.icon_type, name: selectedTransactionType.icon_name }}
-                    onChangeText={() => console.log('Type selected')}
-                    style={styles.input}
-                    disabled
-                    disabledInputStyle={styles.disabled_input}
+            {transactionTypes && selectedTransactionType &&
+                <TransactionTypeSelect
+                    transactionTypes={transactionTypes}
+                    selectedTransactionType={selectedTransactionType}
+                    setSelectedTransactionType={setSelectedTransactionType}
                 />}
-            </TouchableOpacity>
-            <Overlay fullScreen={true} isVisible={transactionTypesExpanded} onBackdropPress={toggleTypesOverlay}>
-                <Text h4>Select Type</Text>
-                <ScrollView>
-                    {transactionTypes && transactionTypes.map((type, i) => (
-                        <ListItem key={i} onPress={() => onTypeIconPress(type)} bottomDivider>
-                            <Icon name={type.icon_name} type={type.icon_type} />
-                            <ListItem.Content>
-                                <ListItem.Title>{type.name}</ListItem.Title>
-                            </ListItem.Content>
-                        </ListItem>
-                    ))}
-                </ScrollView>
-            </Overlay>
             <Input
                 placeholder="Value"
                 leftIcon={{ type: 'material-icons', name: 'account-balance-wallet' }}
