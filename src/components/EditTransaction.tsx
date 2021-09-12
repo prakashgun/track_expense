@@ -1,6 +1,6 @@
 import { useIsFocused } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react'
-import { Alert, StyleSheet, View } from 'react-native'
+import { ActivityIndicator, Alert, StyleSheet, View } from 'react-native'
 import { Button, Header, Input } from 'react-native-elements'
 import { addTransaction, addTransfer, deleteTransaction, getAccounts, getCategories, getTransaction, getTransfer } from '../common/dbQueries'
 import AccountInterface from '../interfaces/AccountInterface'
@@ -25,6 +25,7 @@ const EditTransaction = ({ navigation, route }: any) => {
     const [categories, setCategories] = useState<CategoryInterface[]>()
     const [transaction, setTransaction] = useState<TransactionInterface>()
     const [transfer, setTransfer] = useState<TransferInterface>()
+    const [isLoading, setIsLoading] = useState(true)
     const isFocused = useIsFocused()
 
     const setAccountsFromDb = async () => {
@@ -39,7 +40,9 @@ const EditTransaction = ({ navigation, route }: any) => {
     }
 
     const setTransactionFromDb = async () => {
+        setIsLoading(true)
         setTransaction(await getTransaction(route.params.id))
+        setIsLoading(false)
     }
 
     const setTransferFromDb = async () => {
@@ -221,48 +224,51 @@ const EditTransaction = ({ navigation, route }: any) => {
                 leftComponent={{ onPress: () => navigation.navigate('Menu') }}
                 centerComponent={{ text: 'Add Transaction' }}
             />
-            {transactionTypes && selectedTransactionType &&
-                <TransactionTypeSelect
-                    transactionTypes={transactionTypes}
-                    selectedTransactionType={selectedTransactionType}
-                    setSelectedTransactionType={setSelectedTransactionType}
-                />}
-            <Input
-                placeholder="Value"
-                leftIcon={{ type: 'material-icons', name: 'account-balance-wallet' }}
-                keyboardType="numeric"
-                onChangeText={setValue}
-                value={value}
-            />
-            {categories && selectedCategory && <CategorySelect
-                categories={categories}
-                selectedCategory={selectedCategory}
-                setSelectedCategory={setSelectedCategory}
-            />}
-            {accounts && selectedAccount && selectedTransactionType &&
-                <AccountSelect
-                    accounts={accounts}
-                    selectedAccount={selectedAccount}
-                    setSelectedAccount={setSelectedAccount}
-                    selectedTransactionType={selectedTransactionType}
-                    isFromAccount={true}
-                />}
-            {accounts && selectedToAccount && selectedTransactionType && selectedTransactionType.name === 'Transfer' &&
-                <AccountSelect
-                    accounts={accounts}
-                    selectedAccount={selectedToAccount}
-                    setSelectedAccount={setSelectedToAccount}
-                    selectedTransactionType={selectedTransactionType}
-                    isFromAccount={false}
-                />}
-            <Input
-                placeholder="Note (Optional)"
-                leftIcon={{ type: 'font-awesome', name: 'sticky-note' }}
-                onChangeText={setName}
-                value={name}
-            />
-            <Button title="Save" onPress={onAddItemPress} buttonStyle={styles.button} />
-            <Button title="Delete" onPress={onDeleteItemPress} buttonStyle={styles.button} />
+            {isLoading ? <ActivityIndicator size="large" color="#3e3b33" /> :
+                <View>
+                    {transactionTypes && selectedTransactionType &&
+                        <TransactionTypeSelect
+                            transactionTypes={transactionTypes}
+                            selectedTransactionType={selectedTransactionType}
+                            setSelectedTransactionType={setSelectedTransactionType}
+                        />}
+                    <Input
+                        placeholder="Value"
+                        leftIcon={{ type: 'material-icons', name: 'account-balance-wallet' }}
+                        keyboardType="numeric"
+                        onChangeText={setValue}
+                        value={value}
+                    />
+                    {categories && selectedCategory && <CategorySelect
+                        categories={categories}
+                        selectedCategory={selectedCategory}
+                        setSelectedCategory={setSelectedCategory}
+                    />}
+                    {accounts && selectedAccount && selectedTransactionType &&
+                        <AccountSelect
+                            accounts={accounts}
+                            selectedAccount={selectedAccount}
+                            setSelectedAccount={setSelectedAccount}
+                            selectedTransactionType={selectedTransactionType}
+                            isFromAccount={true}
+                        />}
+                    {accounts && selectedToAccount && selectedTransactionType && selectedTransactionType.name === 'Transfer' &&
+                        <AccountSelect
+                            accounts={accounts}
+                            selectedAccount={selectedToAccount}
+                            setSelectedAccount={setSelectedToAccount}
+                            selectedTransactionType={selectedTransactionType}
+                            isFromAccount={false}
+                        />}
+                    <Input
+                        placeholder="Note (Optional)"
+                        leftIcon={{ type: 'font-awesome', name: 'sticky-note' }}
+                        onChangeText={setName}
+                        value={name}
+                    />
+                    <Button title="Save" onPress={onAddItemPress} buttonStyle={styles.button} />
+                    <Button title="Delete" onPress={onDeleteItemPress} buttonStyle={styles.button} />
+                </View>}
         </View>
     )
 }
