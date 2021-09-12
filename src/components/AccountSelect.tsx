@@ -5,7 +5,7 @@ import AccountInterface from '../interfaces/AccountInterface'
 import AccountSelectInterface from '../interfaces/AccountSelectInterface'
 
 
-const AccountSelect = ({ accounts, selectedAccount, setSelectedAccount, selectedTransactionType, isFromAccount = true }: AccountSelectInterface) => {
+const AccountSelect = ({ accounts, selectedAccount, setSelectedAccount, selectedTransactionType = null, isFromAccount = true }: AccountSelectInterface) => {
 
     const [accountsExpanded, setAccountsExpanded] = useState<boolean>(false)
     let placeholder = 'Account:'

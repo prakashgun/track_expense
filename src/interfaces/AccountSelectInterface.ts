@@ -6,6 +6,6 @@ export default interface AccountSelectInterface {
     accounts: AccountInterface[],
     selectedAccount: AccountInterface,
     setSelectedAccount: (account: AccountInterface) => void,
-    selectedTransactionType: TransactionTypeInterface,
+    selectedTransactionType?: TransactionTypeInterface | null,
     isFromAccount: boolean
 }

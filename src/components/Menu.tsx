@@ -44,6 +44,16 @@ const Menu = () => {
                     </ListItem.Content>
                 </ListItem>
             </TouchableOpacity>
+            <TouchableOpacity
+                onPress={() => navigation.navigate('ImportTransactions')}
+            >
+                <ListItem key="ImportTransactions" bottomDivider>
+                    <Icon name="file-import" type="font-awesome-5" />
+                    <ListItem.Content>
+                        <ListItem.Title>Import Transactions</ListItem.Title>
+                    </ListItem.Content>
+                </ListItem>
+            </TouchableOpacity>
         </View>
     )
 }
