@@ -7,6 +7,7 @@ import AccountInterface from '../interfaces/AccountInterface'
 import CategoryInterface from '../interfaces/CategoryInterface'
 import TransactionInterface, { TransactionTypeInterface, types } from '../interfaces/TransactionInterface'
 import TransferInterface from '../interfaces/TransferInterface'
+import AccountSelect from './AccountSelect'
 import CategorySelect from './CategorySelect'
 
 
@@ -15,11 +16,9 @@ const EditTransaction = ({ navigation, route }: any) => {
     const [value, setValue] = useState<any>()
     const transactionDate: Date = new Date(route.params.transactionDate)
 
-    const [accountsExpanded, setAccountsExpanded] = useState<boolean>(false)
     const [selectedAccount, setSelectedAccount] = useState<AccountInterface>()
     const [accounts, setAccounts] = useState<AccountInterface[]>()
 
-    const [toAccountsExpanded, setToAccountsExpanded] = useState<boolean>(false)
     const [selectedToAccount, setSelectedToAccount] = useState<AccountInterface>()
 
     const [typesExpanded, setTypesExpanded] = useState<boolean>(false)
@@ -36,24 +35,6 @@ const EditTransaction = ({ navigation, route }: any) => {
     const setAccountsFromDb = async () => {
         const allAccounts = await getAccounts()
         setAccounts(allAccounts)
-    }
-
-    const toggleAccountsOverlay = () => {
-        setAccountsExpanded(!accountsExpanded)
-    }
-
-    const onAccountIconPress = (account: AccountInterface) => {
-        setSelectedAccount(account)
-        setAccountsExpanded(!accountsExpanded)
-    }
-
-    const toggleToAccountsOverlay = () => {
-        setToAccountsExpanded(!toAccountsExpanded)
-    }
-
-    const onToAccountIconPress = (account: AccountInterface) => {
-        setSelectedToAccount(account)
-        setToAccountsExpanded(!toAccountsExpanded)
     }
 
     const setCategoriesFromDb = async () => {
@@ -290,54 +271,22 @@ const EditTransaction = ({ navigation, route }: any) => {
                 selectedCategory={selectedCategory}
                 setSelectedCategory={setSelectedCategory}
             />}
-            <TouchableOpacity onPress={toggleAccountsOverlay}>
-                {selectedAccount && <Input
-                    placeholder={(selectedType && selectedType.name === 'Transfer' ? 'From ' : '') + 'Account: ' + selectedAccount.name}
-                    leftIcon={{ type: "font-awesome", name: "bank" }}
-                    onChangeText={() => console.log('Account selected')}
-                    style={styles.input}
-                    disabled
-                    disabledInputStyle={styles.disabled_input}
+            {accounts && selectedAccount && selectedType &&
+                <AccountSelect
+                    accounts={accounts}
+                    selectedAccount={selectedAccount}
+                    setSelectedAccount={setSelectedAccount}
+                    selectedType={selectedType}
+                    isFromAccount={true}
                 />}
-            </TouchableOpacity>
-            <Overlay fullScreen={true} isVisible={accountsExpanded} onBackdropPress={toggleAccountsOverlay}>
-                <Text h4>Select Account</Text>
-                <ScrollView>
-                    {accounts && accounts.map((account, i) => (
-                        <ListItem key={i} onPress={() => onAccountIconPress(account)} bottomDivider>
-                            <Icon name="bank" type="font-awesome" />
-                            <ListItem.Content>
-                                <ListItem.Title>{account.name}</ListItem.Title>
-                            </ListItem.Content>
-                        </ListItem>
-                    ))}
-                </ScrollView>
-            </Overlay>
-            {selectedType && selectedType.name === 'Transfer' && <View>
-                <TouchableOpacity onPress={toggleToAccountsOverlay}>
-                    {selectedToAccount && <Input
-                        placeholder={(selectedType && selectedType.name === 'Transfer' ? 'To ' : '') + 'Account: ' + selectedToAccount.name}
-                        leftIcon={{ type: "font-awesome", name: "bank" }}
-                        onChangeText={() => console.log('ToAccount selected')}
-                        style={styles.input}
-                        disabled
-                        disabledInputStyle={styles.disabled_input}
-                    />}
-                </TouchableOpacity>
-                <Overlay fullScreen={true} isVisible={toAccountsExpanded} onBackdropPress={toggleToAccountsOverlay}>
-                    <Text h4>Select Account</Text>
-                    <ScrollView>
-                        {accounts && accounts.map((account, i) => (
-                            <ListItem key={i} onPress={() => onToAccountIconPress(account)} bottomDivider>
-                                <Icon name="bank" type="font-awesome" />
-                                <ListItem.Content>
-                                    <ListItem.Title>{account.name}</ListItem.Title>
-                                </ListItem.Content>
-                            </ListItem>
-                        ))}
-                    </ScrollView>
-                </Overlay>
-            </View>}
+            {accounts && selectedToAccount && selectedType && selectedType.name === 'Transfer' &&
+                <AccountSelect
+                    accounts={accounts}
+                    selectedAccount={selectedToAccount}
+                    setSelectedAccount={setSelectedToAccount}
+                    selectedType={selectedType}
+                    isFromAccount={false}
+                />}
             <Input
                 placeholder="Note (Optional)"
                 leftIcon={{ type: 'font-awesome', name: 'sticky-note' }}
