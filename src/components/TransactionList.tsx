@@ -1,7 +1,7 @@
 import { useNavigation } from '@react-navigation/core'
 import { useIsFocused } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react'
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import DatePicker from 'react-native-date-picker'
 import { Button, Header, Icon, ListItem } from 'react-native-elements'
 import { getTransactions } from '../common/dbQueries'
@@ -41,11 +41,14 @@ const TransactionList = () => {
     const navigation = useNavigation<any>()
     const [transactions, setTransactions] = useState<TransactionInterface[]>()
     const [transactionDate, setTransactionDate] = useState<Date>(new Date())
+    const [isLoading, setIsLoading] = useState(true)
     const isFocused = useIsFocused()
 
     const setTransactionsFromDb = async (date: Date) => {
+        setIsLoading(true)
         setTransactionDate(date)
         await setTransactions(await getTransactions(date))
+        setIsLoading(false)
     }
 
     useEffect(() => {
@@ -62,17 +65,20 @@ const TransactionList = () => {
                     centerComponent={{ text: 'Transactions' }}
                 />
                 <DatePicker mode="date" androidVariant="nativeAndroid" date={transactionDate} onDateChange={setTransactionsFromDb} />
-                {
-                    transactions && transactions.map((transaction) => (
-                        <TransactionItem
-                            transaction={transaction}
-                            key={transaction.id}
-                            onPress={() => {
-                                return navigation.navigate('EditTransaction', { id: transaction.id, transactionDate: transactionDate.toISOString() })
-                            }}
-                        />
-                    ))
-                }
+                {isLoading ? <ActivityIndicator size="large" color="#3e3b33" /> :
+                    <View>
+                        {
+                            transactions && transactions.map((transaction) => (
+                                <TransactionItem
+                                    transaction={transaction}
+                                    key={transaction.id}
+                                    onPress={() => {
+                                        return navigation.navigate('EditTransaction', { id: transaction.id, transactionDate: transactionDate.toISOString() })
+                                    }}
+                                />
+                            ))
+                        }
+                    </View>}
             </ScrollView>
             <Button title="Add" onPress={() => navigation.navigate('AddTransaction', { transactionDate: transactionDate.toISOString() })} />
         </View>
