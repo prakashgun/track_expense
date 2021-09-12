@@ -5,7 +5,7 @@ import { Button, Header, Icon, Input, ListItem, Overlay, Text } from 'react-nati
 import { addTransaction, addTransfer, getAccounts, getCategories, getTransaction } from '../common/dbQueries'
 import AccountInterface from '../interfaces/AccountInterface'
 import CategoryInterface from '../interfaces/CategoryInterface'
-import { TransactionTypeInterface, types } from '../interfaces/TransactionInterface'
+import TransactionTypeInterface, { transactionTypes } from '../interfaces/TransactionTypeInterface'
 import AccountSelect from './AccountSelect'
 import CategorySelect from './CategorySelect'
 
@@ -20,8 +20,8 @@ const AddTransaction = ({ navigation, route }: any) => {
 
     const [selectedToAccount, setSelectedToAccount] = useState<AccountInterface>()
 
-    const [typesExpanded, setTypesExpanded] = useState<boolean>(false)
-    const [selectedType, setSelectedType] = useState<TransactionTypeInterface>(types[0])
+    const [transactionTypesExpanded, setTransactionTypesExpanded] = useState<boolean>(false)
+    const [selectedTransactionType, setSelectedTransactionType] = useState<TransactionTypeInterface>(transactionTypes[0])
 
     const [selectedCategory, setSelectedCategory] = useState<CategoryInterface>()
     const [categories, setCategories] = useState<CategoryInterface[]>()
@@ -41,12 +41,12 @@ const AddTransaction = ({ navigation, route }: any) => {
     }
 
     const toggleTypesOverlay = () => {
-        setTypesExpanded(!typesExpanded)
+        setTransactionTypesExpanded(!transactionTypesExpanded)
     }
 
     const onTypeIconPress = (type: TransactionTypeInterface) => {
-        setSelectedType(type)
-        setTypesExpanded(!typesExpanded)
+        setSelectedTransactionType(type)
+        setTransactionTypesExpanded(!transactionTypesExpanded)
     }
 
     useEffect(() => {
@@ -75,13 +75,13 @@ const AddTransaction = ({ navigation, route }: any) => {
         const queryResult: any = await addTransaction({
             name: name,
             value: value,
-            is_income: (selectedType.name === 'Income') ? true : false,
+            is_income: (selectedTransactionType.name === 'Income') ? true : false,
             account: selectedAccount,
             category: selectedCategory,
             transaction_date: transactionDate
         })
 
-        if (selectedType.name === 'Transfer') {
+        if (selectedTransactionType.name === 'Transfer') {
 
             if (!selectedToAccount) {
                 Alert.alert('To Account must be selected')
@@ -120,19 +120,19 @@ const AddTransaction = ({ navigation, route }: any) => {
                 centerComponent={{ text: 'Add Transaction' }}
             />
             <TouchableOpacity onPress={toggleTypesOverlay}>
-                {selectedType && <Input
-                    placeholder={`Type: ${selectedType.name}`}
-                    leftIcon={{ type: selectedType.icon_type, name: selectedType.icon_name }}
+                {selectedTransactionType && <Input
+                    placeholder={`Type: ${selectedTransactionType.name}`}
+                    leftIcon={{ type: selectedTransactionType.icon_type, name: selectedTransactionType.icon_name }}
                     onChangeText={() => console.log('Type selected')}
                     style={styles.input}
                     disabled
                     disabledInputStyle={styles.disabled_input}
                 />}
             </TouchableOpacity>
-            <Overlay fullScreen={true} isVisible={typesExpanded} onBackdropPress={toggleTypesOverlay}>
+            <Overlay fullScreen={true} isVisible={transactionTypesExpanded} onBackdropPress={toggleTypesOverlay}>
                 <Text h4>Select Type</Text>
                 <ScrollView>
-                    {types && types.map((type, i) => (
+                    {transactionTypes && transactionTypes.map((type, i) => (
                         <ListItem key={i} onPress={() => onTypeIconPress(type)} bottomDivider>
                             <Icon name={type.icon_name} type={type.icon_type} />
                             <ListItem.Content>
@@ -153,20 +153,20 @@ const AddTransaction = ({ navigation, route }: any) => {
                 selectedCategory={selectedCategory}
                 setSelectedCategory={setSelectedCategory}
             />}
-            {accounts && selectedAccount && selectedType &&
+            {accounts && selectedAccount && selectedTransactionType &&
                 <AccountSelect
                     accounts={accounts}
                     selectedAccount={selectedAccount}
                     setSelectedAccount={setSelectedAccount}
-                    selectedType={selectedType}
+                    selectedTransactionType={selectedTransactionType}
                     isFromAccount={true}
                 />}
-            {accounts && selectedToAccount && selectedType && selectedType.name === 'Transfer' &&
+            {accounts && selectedToAccount && selectedTransactionType && selectedTransactionType.name === 'Transfer' &&
                 <AccountSelect
                     accounts={accounts}
                     selectedAccount={selectedToAccount}
                     setSelectedAccount={setSelectedToAccount}
-                    selectedType={selectedType}
+                    selectedTransactionType={selectedTransactionType}
                     isFromAccount={false}
                 />}
             <Input
