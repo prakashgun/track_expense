@@ -153,20 +153,22 @@ const AddTransaction = ({ navigation, route }: any) => {
                 selectedCategory={selectedCategory}
                 setSelectedCategory={setSelectedCategory}
             />}
-            {accounts && selectedAccount && selectedType && <AccountSelect
-                accounts={accounts}
-                selectedAccount={selectedAccount}
-                setSelectedAccount={setSelectedAccount}
-                selectedType={selectedType}
-                isFromAccount={true}
-            />}
-            {accounts && selectedToAccount && selectedType && selectedType.name === 'Transfer' && <AccountSelect
-                accounts={accounts}
-                selectedAccount={selectedToAccount}
-                setSelectedAccount={setSelectedToAccount}
-                selectedType={selectedType}
-                isFromAccount={false}
-            />}
+            {accounts && selectedAccount && selectedType &&
+                <AccountSelect
+                    accounts={accounts}
+                    selectedAccount={selectedAccount}
+                    setSelectedAccount={setSelectedAccount}
+                    selectedType={selectedType}
+                    isFromAccount={true}
+                />}
+            {accounts && selectedToAccount && selectedType && selectedType.name === 'Transfer' &&
+                <AccountSelect
+                    accounts={accounts}
+                    selectedAccount={selectedToAccount}
+                    setSelectedAccount={setSelectedToAccount}
+                    selectedType={selectedType}
+                    isFromAccount={false}
+                />}
             <Input
                 placeholder="Note (Optional)"
                 leftIcon={{ type: 'font-awesome', name: 'sticky-note' }}
