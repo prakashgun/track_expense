@@ -34,7 +34,13 @@ const ImportTransactions = ({ navigation, route }: any) => {
         const allAccounts = await getAccounts()
         setAccounts(allAccounts)
         setSelectedAccount(allAccounts[0])
-        setSelectedToAccount(allAccounts[0])
+
+        if (allAccounts.length > 1) {
+            setSelectedToAccount(allAccounts[1])
+        } else {
+            setSelectedToAccount(allAccounts[0])
+        }
+
         setIsLoading(false)
     }
 
@@ -73,23 +79,23 @@ const ImportTransactions = ({ navigation, route }: any) => {
 
             readFile(res[0].uri, 'ascii').then((res) => {
                 const wb = XLSX.read(res, { type: 'binary' })
-                console.log('workbook is')
                 /* convert first worksheet to AOA */
                 const wsname = wb.SheetNames[0];
                 const ws = wb.Sheets[wsname];
                 const data = XLSX.utils.sheet_to_json(ws, { header: 1 })
                 let foundData = false
-                const date_regex = /^(0?[1-9]|[12][0-9]|3[01])[\/\-](0?[1-9]|1[012])[\/\-]\d{4}$/
+                // Took from https://stackoverflow.com/a/15504877/6842203
+                const date_regex = /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/
 
                 if (selectedImportBank.name == 'Axis') {
                     data.forEach((line: any) => {
                         if (foundData) {
                             if (date_regex.test(line[1])) {
                                 records.push({
-                                    date: line[1],
-                                    note: line[3],
-                                    dr: line[4],
-                                    cr: [5]
+                                    date: line[1].trim(),
+                                    note: line[3].trim(),
+                                    dr: line[4].trim(),
+                                    cr: line[5].trim()
                                 })
                             } else {
                                 foundData = false
@@ -100,27 +106,53 @@ const ImportTransactions = ({ navigation, route }: any) => {
                             foundData = true
                         }
                     })
-                }else if(selectedImportBank.name=='HDFC'){
+                } else if (selectedImportBank.name == 'HDFC') {
                     data.forEach((line: any) => {
                         if (foundData) {
-                            if (date_regex.test(line[1])) {
+                            if (date_regex.test(line[0])) {
                                 records.push({
-                                    date: line[0],
-                                    note: line[1],
+                                    date: line[0].trim(),
+                                    note: line[1].trim(),
                                     dr: line[4],
-                                    cr: [5]
+                                    cr: line[5]
                                 })
                             }
                         }
-
+                        
                         if (line.includes('Withdrawal Amt.')) {
                             foundData = true
                         }
                     })
                 }
 
+                console.log('records')
+                console.log(records)
+
+
+                if (records) {
+                    Alert.alert(
+                        'Import',
+                        `Import ${records.length} records from file ?`,
+                        [
+                            {
+                                text: 'Cancel',
+                                onPress: () => console.log('Cancel pressed'),
+                                style: 'cancel'
+                            },
+                            {
+                                text: 'OK',
+                                onPress: () => insertRecords(records)
+                            }
+                        ]
+                    )
+                } else {
+                    Alert.alert('No records exists in this file')
+                }
+
                 /* DO SOMETHING WITH workbook HERE */
             })
+
+
 
             // RNFetchBlob.fs.readFile(res[0].uri, 'utf8')
             //     .then((data) => {
