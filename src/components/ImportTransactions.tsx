@@ -2,27 +2,22 @@ import { useIsFocused } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react'
 import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native'
 import DocumentPicker from 'react-native-document-picker'
-import { Button, Header, Input } from 'react-native-elements'
-import RNFetchBlob from 'rn-fetch-blob'
-import { addTransaction, addTransfer, getAccounts, getCategories, getTransaction } from '../common/dbQueries'
+import { Header, Input } from 'react-native-elements'
+import { readFile } from 'react-native-fs'
+import XLSX from 'xlsx'
+import { getAccounts, getCategories } from '../common/dbQueries'
 import AccountInterface from '../interfaces/AccountInterface'
 import CategoryInterface from '../interfaces/CategoryInterface'
-import { importBanks } from '../interfaces/ImportBankInterface'
-import TransactionTypeInterface, { transactionTypes } from '../interfaces/TransactionTypeInterface'
+import ImportBankInterface, { importBanks } from '../interfaces/ImportBankInterface'
+import ImportRecordInterface from '../interfaces/ImportRecordInterface'
 import AccountSelect from './AccountSelect'
 import ImportBankSelect from './ImportBankSelect'
-import { writeFile, readFile } from 'react-native-fs'
-import XLSX from 'xlsx'
 
 
 const ImportTransactions = ({ navigation, route }: any) => {
-    const [name, setName] = useState<string>('')
-    const [value, setValue] = useState<any>()
-    const transactionDate: Date = new Date()
     const [selectedAccount, setSelectedAccount] = useState<AccountInterface>()
     const [accounts, setAccounts] = useState<AccountInterface[]>()
     const [selectedToAccount, setSelectedToAccount] = useState<AccountInterface>()
-    const [selectedTransactionType, setSelectedTransactionType] = useState<TransactionTypeInterface>(transactionTypes[0])
     const [selectedCategory, setSelectedCategory] = useState<CategoryInterface>()
     const [categories, setCategories] = useState<CategoryInterface[]>()
     const [isLoading, setIsLoading] = useState(true)
@@ -66,14 +61,113 @@ const ImportTransactions = ({ navigation, route }: any) => {
         console.log(records)
     }
 
+    const parseRecords = (selectedImportBank: ImportBankInterface, data: Array<any>): ImportRecordInterface[] => {
+        let foundData: boolean = false, key_phrase: string
+        let amount: number, expense_or_transfer_out_account: string, income_or_transfer_in_account: string
+        let category_name: string
+        let date_column: number, dr_column: number, cr_column: number, note_column: number
+        const date_regex = /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/
+        let records: ImportRecordInterface[] = Array()
+
+        console.log(selectedImportBank.name)
+        if (selectedImportBank.name == 'Other') {
+            date_column = 0
+            key_phrase = 'expense or transfer out account'
+
+            data.forEach((line: any) => {
+                console.log(line)
+                if (foundData) {
+                    if (date_regex.test(line[date_column])) {
+                        records.push({
+                            date: line[date_column].trim(),
+                            amount: parseFloat(line[1]),
+                            category: line[2].trim(),
+                            expense_or_transfer_out_account: line[3] !== undefined ? line[3].trim(): '',
+                            income_or_transfer_in_account: line[4] !== undefined ? line[4].trim(): '',
+                            note: line[5] !== undefined ? line[5].trim(): '',
+                            system_generated_id: line[6] !== undefined ? line[6].trim(): ''
+                        })
+                    } else {
+                        foundData = false
+                    }
+                }
+
+                if (line.includes(key_phrase)) {
+                    foundData = true
+                }
+            })
+
+            return records
+        }
+
+        switch (selectedImportBank.name) {
+            case 'Axis':
+                key_phrase = 'Tran Date'
+                category_name = 'Others'
+                date_column = 1
+                note_column = 3
+                dr_column = 4
+                cr_column = 5
+                break
+            case 'HDFC':
+                key_phrase = 'Withdrawal Amt.'
+                category_name = 'Others'
+                date_column = 0
+                note_column = 1
+                dr_column = 4
+                cr_column = 5
+                break
+            case 'Icici':
+                key_phrase = 'Value Date'
+                category_name = 'Others'
+                date_column = 2
+                note_column = 4
+                dr_column = 6
+                cr_column = 7
+                break
+
+            default:
+                return records
+        }
+
+        data.forEach((line: any) => {
+            if (foundData) {
+                if (date_regex.test(line[date_column])) {
+                    if (line[dr_column]) {
+                        amount = parseFloat(line[dr_column])
+                        expense_or_transfer_out_account = selectedImportBank.name
+                        income_or_transfer_in_account = ''
+                    } else {
+                        amount = parseFloat(line[cr_column])
+                        expense_or_transfer_out_account = ''
+                        income_or_transfer_in_account = selectedImportBank.name
+                    }
+
+                    records.push({
+                        date: line[date_column].trim(),
+                        amount: amount,
+                        category: category_name,
+                        expense_or_transfer_out_account: expense_or_transfer_out_account,
+                        income_or_transfer_in_account: income_or_transfer_in_account,
+                        note: line[note_column].trim(),
+                        system_generated_id: ''
+                    })
+                }
+            }
+
+            if (line.includes(key_phrase)) {
+                foundData = true
+            }
+        })
+
+        return records
+    }
+
     const onSelectFilePress = async () => {
         try {
             const res = await DocumentPicker.pick({
                 type: [DocumentPicker.types.xls, DocumentPicker.types.xlsx],
             })
-            console.log(
-                res
-            )
 
             let records = new Array()
 
@@ -83,68 +177,11 @@ const ImportTransactions = ({ navigation, route }: any) => {
                 const wsname = wb.SheetNames[0];
                 const ws = wb.Sheets[wsname];
                 const data = XLSX.utils.sheet_to_json(ws, { header: 1 })
-                let foundData = false
                 // Took from https://stackoverflow.com/a/15504877/6842203
-                const date_regex = /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/
-
-                if (selectedImportBank.name == 'Axis') {
-                    data.forEach((line: any) => {
-                        if (foundData) {
-                            if (date_regex.test(line[1])) {
-                                records.push({
-                                    date: line[1].trim(),
-                                    note: line[3].trim(),
-                                    dr: line[4].trim(),
-                                    cr: line[5].trim()
-                                })
-                            } else {
-                                foundData = false
-                            }
-                        }
-
-                        if (line.includes('Tran Date')) {
-                            foundData = true
-                        }
-                    })
-                } else if (selectedImportBank.name == 'HDFC') {
-                    data.forEach((line: any) => {
-                        if (foundData) {
-                            if (date_regex.test(line[0])) {
-                                records.push({
-                                    date: line[0].trim(),
-                                    note: line[1].trim(),
-                                    dr: line[4],
-                                    cr: line[5]
-                                })
-                            }
-                        }
-
-                        if (line.includes('Withdrawal Amt.')) {
-                            foundData = true
-                        }
-                    })
-                } else if (selectedImportBank.name == 'Icici') {
-                    data.forEach((line: any) => {
-                        if (foundData) {
-                            if (date_regex.test(line[2])) {
-                                records.push({
-                                    date: line[2].trim(),
-                                    note: line[4].trim(),
-                                    dr: line[5],
-                                    cr: line[6]
-                                })
-                            }
-                        }
-
-                        if (line.includes('Value Date')) {
-                            foundData = true
-                        }
-                    })
-                }
+                records = parseRecords(selectedImportBank, data)
 
                 console.log('records')
                 console.log(records)
-
 
                 if (records) {
                     Alert.alert(
@@ -166,56 +203,8 @@ const ImportTransactions = ({ navigation, route }: any) => {
                     Alert.alert('No records exists in this file')
                 }
 
-                /* DO SOMETHING WITH workbook HERE */
             })
 
-
-
-            // RNFetchBlob.fs.readFile(res[0].uri, 'utf8')
-            //     .then((data) => {
-            //         let lines = data.split('\n')
-            //         let foundData = false
-            //         const date_regex = /^(0?[1-9]|[12][0-9]|3[01])[\/\-](0?[1-9]|1[012])[\/\-]\d{4}$/
-
-            //         lines.forEach((line: string) => {
-            //             let fields: Array<string> = line.split(',')
-
-            //             console.log(fields)
-
-            //             if (foundData) {
-            //                 if (date_regex.test(fields[0])) {
-            //                     console.log(fields)
-            //                     records.push(fields)
-            //                 } else {
-            //                     foundData = false
-            //                 }
-            //             }
-
-            //             if (fields.includes('Tran Date')) {
-            //                 foundData = true
-            //             }
-            //         })
-
-            //         if (records) {
-            //             Alert.alert(
-            //                 'Import',
-            //                 `Import ${records.length} records from file ?`,
-            //                 [
-            //                     {
-            //                         text: 'Cancel',
-            //                         onPress: () => console.log('Cancel pressed'),
-            //                         style: 'cancel'
-            //                     },
-            //                     {
-            //                         text: 'OK',
-            //                         onPress: () => insertRecords(records)
-            //                     }
-            //                 ]
-            //             )
-            //         } else {
-            //             Alert.alert('No records exists in this file')
-            //         }
-            //     })
         } catch (err: any) {
             if (DocumentPicker.isCancel(err)) {
                 // User cancelled the picker, exit any dialogs or menus and move on
@@ -225,63 +214,6 @@ const ImportTransactions = ({ navigation, route }: any) => {
             }
         }
 
-    }
-
-    const onAddItemPress = async () => {
-        if (!value) {
-            Alert.alert('Transaction value cannot be empty')
-            return
-        }
-
-        if (!selectedAccount) {
-            Alert.alert('Account must be selected')
-            return
-        }
-
-        if (!selectedCategory) {
-            Alert.alert('Category must be selected')
-            return
-        }
-
-        const queryResult: any = await addTransaction({
-            name: name,
-            value: value,
-            is_income: (selectedTransactionType.name === 'Income') ? true : false,
-            account: selectedAccount,
-            category: selectedCategory,
-            transaction_date: transactionDate
-        })
-
-        if (selectedTransactionType.name === 'Transfer') {
-
-            if (!selectedToAccount) {
-                Alert.alert('To Account must be selected')
-                return
-            }
-
-            if (selectedAccount === selectedToAccount) {
-                Alert.alert('From and To Account cannot be the same')
-                return
-            }
-
-            const secondQueryResult: any = await addTransaction({
-                name: name,
-                value: value,
-                is_income: true,
-                account: selectedToAccount,
-                category: selectedCategory,
-                transaction_date: transactionDate
-            })
-
-            await addTransfer({
-                from_transaction: await getTransaction(queryResult['insertId']),
-                to_transaction: await getTransaction(secondQueryResult['insertId'])
-            })
-
-        }
-
-        console.log('Transaction saved')
-        navigation.goBack()
     }
 
     return (
@@ -296,7 +228,7 @@ const ImportTransactions = ({ navigation, route }: any) => {
                     selectedImportBank={selectedImportBank}
                     setSelectedImportBank={setSelectedImportBank}
                 />}
-            {accounts && selectedToAccount &&
+            {selectedImportBank.name !== 'Other' && accounts && selectedToAccount &&
                 <AccountSelect
                     accounts={accounts}
                     selectedAccount={selectedToAccount}

@@ -24,7 +24,7 @@ const ImportBankSelect = ({
         <View>
             <TouchableOpacity onPress={toggleImportBanksOverlay}>
                 {selectedImportBank && <Input
-                    placeholder={`Import Bank: ${selectedImportBank.name}`}
+                    placeholder={`Import Type: ${selectedImportBank.name}`}
                     leftIcon={{ type: "font-awesome", name: "bank" }}
                     onChangeText={() => console.log('Type selected')}
                     style={styles.input}
