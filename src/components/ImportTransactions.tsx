@@ -118,8 +118,25 @@ const ImportTransactions = ({ navigation, route }: any) => {
                                 })
                             }
                         }
-                        
+
                         if (line.includes('Withdrawal Amt.')) {
+                            foundData = true
+                        }
+                    })
+                } else if (selectedImportBank.name == 'Icici') {
+                    data.forEach((line: any) => {
+                        if (foundData) {
+                            if (date_regex.test(line[2])) {
+                                records.push({
+                                    date: line[2].trim(),
+                                    note: line[4].trim(),
+                                    dr: line[5],
+                                    cr: line[6]
+                                })
+                            }
+                        }
+
+                        if (line.includes('Value Date')) {
                             foundData = true
                         }
                     })
