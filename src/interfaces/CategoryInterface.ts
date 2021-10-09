@@ -1,5 +1,5 @@
 export default interface CategoryInterface {
-    id?: number, 
+    id: string, 
     name: string, 
     icon_name: string,
     icon_type: string,

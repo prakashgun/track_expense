@@ -5,13 +5,14 @@ import DocumentPicker from 'react-native-document-picker'
 import { Header, Input } from 'react-native-elements'
 import { readFile } from 'react-native-fs'
 import XLSX from 'xlsx'
-import { getAccounts, getCategories } from '../common/dbQueries'
+import { addTransaction, getAccounts, getCategories } from '../common/dbQueries'
 import AccountInterface from '../interfaces/AccountInterface'
 import CategoryInterface from '../interfaces/CategoryInterface'
 import ImportBankInterface, { importBanks } from '../interfaces/ImportBankInterface'
 import ImportRecordInterface from '../interfaces/ImportRecordInterface'
 import AccountSelect from './AccountSelect'
 import ImportBankSelect from './ImportBankSelect'
+import { v4 as uuidv4 } from 'uuid'
 
 
 const ImportTransactions = ({ navigation, route }: any) => {
@@ -56,9 +57,19 @@ const ImportTransactions = ({ navigation, route }: any) => {
         }
     }, [isFocused])
 
-    const insertRecords = async (records: Array<Array<string>>) => {
+    const insertRecords = async (records: Array<any>) => {
         console.log('Started inserting records')
         console.log(records)
+        // for(const record  of records){
+        //     const queryResult: any = await addTransaction({
+        //         name: record.note,
+        //         value: record.amount,
+        //         is_income: (selectedTransactionType.name === 'Income') ? true : false,
+        //         account: selectedAccount,
+        //         category: selectedCategory,
+        //         transaction_date: transactionDate
+        //     })
+        // }
     }
 
     const parseRecords = (selectedImportBank: ImportBankInterface, data: Array<any>): ImportRecordInterface[] => {

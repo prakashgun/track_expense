@@ -1,5 +1,5 @@
 export default interface AccountInterface {
-    id?: number,
+    id: string,
     name: string,
     initial_balance: number,
     total_expense?: number,

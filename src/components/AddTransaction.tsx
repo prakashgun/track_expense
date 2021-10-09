@@ -9,6 +9,7 @@ import TransactionTypeInterface, { transactionTypes } from '../interfaces/Transa
 import AccountSelect from './AccountSelect'
 import CategorySelect from './CategorySelect'
 import TransactionTypeSelect from './TransactionTypeSelect'
+import { v4 as uuidv4 } from 'uuid'
 
 
 const AddTransaction = ({ navigation, route }: any) => {
@@ -66,7 +67,10 @@ const AddTransaction = ({ navigation, route }: any) => {
             return
         }
 
-        const queryResult: any = await addTransaction({
+        const from_transaction_id: string = uuidv4()
+
+        await addTransaction({
+            id: from_transaction_id,
             name: name,
             value: value,
             is_income: (selectedTransactionType.name === 'Income') ? true : false,
@@ -87,7 +91,10 @@ const AddTransaction = ({ navigation, route }: any) => {
                 return
             }
 
-            const secondQueryResult: any = await addTransaction({
+            const to_transaction_id: string = uuidv4()
+
+            await addTransaction({
+                id: to_transaction_id,
                 name: name,
                 value: value,
                 is_income: true,
@@ -97,8 +104,9 @@ const AddTransaction = ({ navigation, route }: any) => {
             })
 
             await addTransfer({
-                from_transaction: await getTransaction(queryResult['insertId']),
-                to_transaction: await getTransaction(secondQueryResult['insertId'])
+                id: uuidv4(),
+                from_transaction: await getTransaction(from_transaction_id),
+                to_transaction: await getTransaction(to_transaction_id)
             })
 
         }

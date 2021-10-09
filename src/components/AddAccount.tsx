@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { Alert, StyleSheet, View } from 'react-native'
 import { Button, Header, Input } from 'react-native-elements'
 import { addAccount } from '../common/dbQueries'
+import { v4 as uuidv4 } from 'uuid'
 
 
 const AddAccount = () => {
@@ -23,6 +24,7 @@ const AddAccount = () => {
         }
 
         await addAccount({
+            id: uuidv4(),
             name: name,
             initial_balance: balance
         })

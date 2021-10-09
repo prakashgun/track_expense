@@ -3,7 +3,7 @@ import CategoryInterface from "./CategoryInterface"
 
 
 export default interface TransactionInterface {
-    id?: number,
+    id: string,
     name: string,
     value: number,
     is_income: boolean,

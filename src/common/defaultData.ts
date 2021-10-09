@@ -1,3 +1,10 @@
+export const defaultAccounts = [
+    {
+        name: 'Cash',
+        initial_balance: 0
+    }
+]
+
 export const defaultCategories = [
     {
         name: 'Food',

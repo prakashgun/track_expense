@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { Button, Header, Icon, Input, ListItem, Overlay } from 'react-native-elements'
 import { addCategory } from '../common/dbQueries'
+import { v4 as uuidv4 } from 'uuid'
 
 
 const AddCategory = ({ navigation }: any) => {
@@ -81,6 +82,7 @@ const AddCategory = ({ navigation }: any) => {
         }
 
         await addCategory({
+            id: uuidv4(),
             name: name,
             icon_name: selectedIcon.icon_name,
             icon_type: selectedIcon.icon_type
