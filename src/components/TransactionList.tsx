@@ -64,6 +64,13 @@ const TransactionList = () => {
         setTransactionsFromDb(newDate)
     }
 
+
+    const currentDay = () => {
+        let newDate = new Date()
+        setTransactionDate(newDate)
+        setTransactionsFromDb(newDate)
+    }
+
     const increaseDay = () => {
         let newDate = transactionDate
         newDate.setDate(transactionDate.getDate() + 1)
@@ -82,7 +89,7 @@ const TransactionList = () => {
                     <DatePicker mode="date" androidVariant="nativeAndroid" date={transactionDate} onDateChange={setTransactionsFromDb} />
                     <View style={styles.date_quick_nav}>
                         <Icon name="caretup" type="ant-design" onPress={decreaseDay} />
-                        <Icon name="today" type="ion-icons" onPress={() => setTransactionDate(new Date())} />
+                        <Icon name="today" type="ion-icons" onPress={currentDay} />
                         <Icon name="caretdown" type="ant-design" onPress={increaseDay} />
                     </View>
                 </View>
