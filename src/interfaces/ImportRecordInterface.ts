@@ -1,5 +1,5 @@
 export default interface ImportRecordInterface {
-    date: string,
+    date: Date,
     amount: number,
     category: string,
     expense_or_transfer_out_account: string,

@@ -1,4 +1,5 @@
 import { useIsFocused } from '@react-navigation/native'
+import moment from 'moment'
 import React, { useEffect, useState } from 'react'
 import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native'
 import DocumentPicker from 'react-native-document-picker'
@@ -57,7 +58,8 @@ const ImportTransactions = ({ navigation, route }: any) => {
                 }
             } else {
 
-                if (record.date === '' || record.category === '') {
+                if (!record.date || record.category === '' ||
+                    (!record.expense_or_transfer_out_account && !record.income_or_transfer_in_account)) {
                     console.log('Invalid record skipping')
                     console.log(record)
                     continue
@@ -67,7 +69,8 @@ const ImportTransactions = ({ navigation, route }: any) => {
                 let account_name = ''
 
                 if (record.expense_or_transfer_out_account && record.income_or_transfer_in_account) {
-
+                    console.log('Transaction not suported now. Skipping...')
+                    continue
                 } else if (!record.expense_or_transfer_out_account && record.income_or_transfer_in_account) {
                     is_income = true
                     account_name = record.income_or_transfer_in_account
@@ -111,19 +114,20 @@ const ImportTransactions = ({ navigation, route }: any) => {
 
                 const from_transaction_id: string = uuidv4()
 
-                await addTransaction({
+                console.log(await addTransaction({
                     id: from_transaction_id,
                     name: record.note,
                     value: record.amount,
                     is_income: is_income,
                     account: account,
                     category: category,
-                    transaction_date: new Date(record.date)
-                })
+                    transaction_date: record.date
+                }))
 
-                Alert.alert('Transactions imported')
             }
         }
+
+        Alert.alert('Completed')
     }
 
     const parseRecords = (selectedImportBank: ImportBankInterface, data: Array<any>): ImportRecordInterface[] => {
@@ -140,11 +144,14 @@ const ImportTransactions = ({ navigation, route }: any) => {
             key_phrase = 'expense or transfer out account'
 
             data.forEach((line: any) => {
-                console.log(line)
+                //https://stackoverflow.com/a/57154675/6842203
+                let unixTimestamp = (line[date_column] - 25569) * 86400 //as per the post above, convert Excel date to unix timestamp, assuming Mac/Windows Excel 2011 onwards
+
+                let momentDate = moment(new Date(unixTimestamp * 1000))
                 if (foundData) {
-                    if (date_regex.test(line[date_column])) {
+                    if (momentDate.isValid()) {
                         records.push({
-                            date: line[date_column].trim(),
+                            date: momentDate.toDate(),
                             amount: parseFloat(line[1]),
                             category: line[2].trim(),
                             expense_or_transfer_out_account: line[3] !== undefined ? line[3].trim() : '',
