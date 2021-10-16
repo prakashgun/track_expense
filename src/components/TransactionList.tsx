@@ -44,6 +44,12 @@ const TransactionList = () => {
     const [isLoading, setIsLoading] = useState(true)
     const isFocused = useIsFocused()
 
+    useEffect(() => {
+        if (isFocused) {
+            setTransactionsFromDb(transactionDate)
+        }
+    }, [isFocused])
+
     const setTransactionsFromDb = async (date: Date) => {
         setIsLoading(true)
         setTransactionDate(date)
@@ -51,11 +57,19 @@ const TransactionList = () => {
         setIsLoading(false)
     }
 
-    useEffect(() => {
-        if (isFocused) {
-            setTransactionsFromDb(transactionDate)
-        }
-    }, [isFocused])
+    const decreaseDay = () => {
+        let newDate = transactionDate
+        newDate.setDate(transactionDate.getDate() - 1)
+        setTransactionDate(newDate)
+        setTransactionsFromDb(newDate)
+    }
+
+    const increaseDay = () => {
+        let newDate = transactionDate
+        newDate.setDate(transactionDate.getDate() + 1)
+        setTransactionDate(newDate)
+        setTransactionsFromDb(newDate)
+    }
 
     return (
         <View style={styles.container}>
@@ -64,7 +78,14 @@ const TransactionList = () => {
                     leftComponent={{ onPress: () => navigation.navigate('Menu') }}
                     centerComponent={{ text: 'Transactions' }}
                 />
-                <DatePicker mode="date" androidVariant="nativeAndroid" date={transactionDate} onDateChange={setTransactionsFromDb} />
+                <View style={styles.date_menu_panel}>
+                    <DatePicker mode="date" androidVariant="nativeAndroid" date={transactionDate} onDateChange={setTransactionsFromDb} />
+                    <View style={styles.date_quick_nav}>
+                        <Icon name="caretup" type="ant-design" onPress={decreaseDay} />
+                        <Icon name="today" type="ion-icons" onPress={() => setTransactionDate(new Date())} />
+                        <Icon name="caretdown" type="ant-design" onPress={increaseDay} />
+                    </View>
+                </View>
                 {isLoading ? <ActivityIndicator size="large" color="#3e3b33" /> :
                     <View>
                         {
@@ -91,13 +112,10 @@ const styles = StyleSheet.create({
     container: {
         flex: 1
     },
-    date_scroller: {
-        flexDirection: 'row',
-        justifyContent: 'space-evenly',
-        alignItems: 'center',
-        padding: 10
+    date_menu_panel: {
+        flexDirection: 'row'
     },
-    date_scroller_text: {
-        fontSize: 16
+    date_quick_nav: {
+        justifyContent: 'space-around',
     }
 })

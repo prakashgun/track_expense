@@ -4,23 +4,23 @@ import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native'
 import DocumentPicker from 'react-native-document-picker'
 import { Header, Input } from 'react-native-elements'
 import { readFile } from 'react-native-fs'
+import { v4 as uuidv4 } from 'uuid'
 import XLSX from 'xlsx'
-import { addTransaction, getAccounts, getCategories } from '../common/dbQueries'
+import {
+    addAccount, addCategory, addTransaction, getAccountByName, getAccounts, getCategoryByName,
+    getTransaction
+} from '../common/dbQueries'
 import AccountInterface from '../interfaces/AccountInterface'
 import CategoryInterface from '../interfaces/CategoryInterface'
 import ImportBankInterface, { importBanks } from '../interfaces/ImportBankInterface'
 import ImportRecordInterface from '../interfaces/ImportRecordInterface'
 import AccountSelect from './AccountSelect'
 import ImportBankSelect from './ImportBankSelect'
-import { v4 as uuidv4 } from 'uuid'
 
 
 const ImportTransactions = ({ navigation, route }: any) => {
-    const [selectedAccount, setSelectedAccount] = useState<AccountInterface>()
     const [accounts, setAccounts] = useState<AccountInterface[]>()
     const [selectedToAccount, setSelectedToAccount] = useState<AccountInterface>()
-    const [selectedCategory, setSelectedCategory] = useState<CategoryInterface>()
-    const [categories, setCategories] = useState<CategoryInterface[]>()
     const [isLoading, setIsLoading] = useState(true)
     const [selectedImportBank, setSelectedImportBank] = useState(importBanks[0])
     const isFocused = useIsFocused()
@@ -29,7 +29,6 @@ const ImportTransactions = ({ navigation, route }: any) => {
         setIsLoading(true)
         const allAccounts = await getAccounts()
         setAccounts(allAccounts)
-        setSelectedAccount(allAccounts[0])
 
         if (allAccounts.length > 1) {
             setSelectedToAccount(allAccounts[1])
@@ -40,36 +39,91 @@ const ImportTransactions = ({ navigation, route }: any) => {
         setIsLoading(false)
     }
 
-    const setCategoriesFromDb = async () => {
-        setIsLoading(true)
-        const allCategories = await getCategories()
-        setCategories(allCategories)
-        setSelectedCategory(allCategories[0])
-        setIsLoading(false)
-    }
-
     useEffect(() => {
         if (isFocused) {
             setIsLoading(true)
             setAccountsFromDb()
-            setCategoriesFromDb()
             setIsLoading(false)
         }
     }, [isFocused])
 
-    const insertRecords = async (records: Array<any>) => {
+    const insertRecords = async (records: ImportRecordInterface[]) => {
         console.log('Started inserting records')
         console.log(records)
-        // for(const record  of records){
-        //     const queryResult: any = await addTransaction({
-        //         name: record.note,
-        //         value: record.amount,
-        //         is_income: (selectedTransactionType.name === 'Income') ? true : false,
-        //         account: selectedAccount,
-        //         category: selectedCategory,
-        //         transaction_date: transactionDate
-        //     })
-        // }
+        for (const record of records) {
+            if (record.system_generated_id) {
+                if (await getTransaction(record.system_generated_id)) {
+
+                }
+            } else {
+
+                if (record.date === '' || record.category === '') {
+                    console.log('Invalid record skipping')
+                    console.log(record)
+                    continue
+                }
+
+                let is_income = false
+                let account_name = ''
+
+                if (record.expense_or_transfer_out_account && record.income_or_transfer_in_account) {
+
+                } else if (!record.expense_or_transfer_out_account && record.income_or_transfer_in_account) {
+                    is_income = true
+                    account_name = record.income_or_transfer_in_account
+                } else if (record.expense_or_transfer_out_account && !record.income_or_transfer_in_account) {
+                    is_income = false
+                    account_name = record.expense_or_transfer_out_account
+                } else {
+                    console.log('Cannot identify expense type for this record:')
+                    console.log(record)
+                    continue
+                }
+
+                let account: AccountInterface = await getAccountByName(account_name)
+
+                if (!account) {
+                    console.log(`Creating non existant account: ${account_name}`)
+
+                    await addAccount({
+                        id: uuidv4(),
+                        name: account_name.trim(),
+                        initial_balance: 0
+                    })
+
+                    account = await getAccountByName(account_name)
+                }
+
+                let category: CategoryInterface = await getCategoryByName(record.category)
+
+                if (!category) {
+                    console.log(`Creating non existant category: ${record.category}`)
+
+                    await addCategory({
+                        id: uuidv4(),
+                        name: record.category,
+                        icon_name: 'miscellaneous-services',
+                        icon_type: 'material-icons'
+                    })
+
+                    category = await getCategoryByName(record.category)
+                }
+
+                const from_transaction_id: string = uuidv4()
+
+                await addTransaction({
+                    id: from_transaction_id,
+                    name: record.note,
+                    value: record.amount,
+                    is_income: is_income,
+                    account: account,
+                    category: category,
+                    transaction_date: new Date(record.date)
+                })
+
+                Alert.alert('Transactions imported')
+            }
+        }
     }
 
     const parseRecords = (selectedImportBank: ImportBankInterface, data: Array<any>): ImportRecordInterface[] => {
@@ -93,10 +147,10 @@ const ImportTransactions = ({ navigation, route }: any) => {
                             date: line[date_column].trim(),
                             amount: parseFloat(line[1]),
                             category: line[2].trim(),
-                            expense_or_transfer_out_account: line[3] !== undefined ? line[3].trim(): '',
-                            income_or_transfer_in_account: line[4] !== undefined ? line[4].trim(): '',
-                            note: line[5] !== undefined ? line[5].trim(): '',
-                            system_generated_id: line[6] !== undefined ? line[6].trim(): ''
+                            expense_or_transfer_out_account: line[3] !== undefined ? line[3].trim() : '',
+                            income_or_transfer_in_account: line[4] !== undefined ? line[4].trim() : '',
+                            note: line[5] !== undefined ? line[5].trim() : '',
+                            system_generated_id: line[6] !== undefined ? line[6].trim() : ''
                         })
                     } else {
                         foundData = false

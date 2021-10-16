@@ -169,6 +169,14 @@ export const getAccount = async (id: string): Promise<AccountInterface> => {
     return itemFromResult(result)
 }
 
+export const getAccountByName = async (name: string): Promise<AccountInterface> => {
+    const result: any = await executeQuery(
+        `SELECT * FROM accounts WHERE name='${name}'`
+    )
+
+    return itemFromResult(result)
+}
+
 export const deleteAccount = async (id: string) => {
     await executeQuery(
         `DELETE FROM accounts WHERE id='${id}'`
@@ -198,6 +206,14 @@ export const getCategory = async (id: string): Promise<CategoryInterface> => {
     return itemFromResult(result)
 }
 
+export const getCategoryByName = async (name: string): Promise<CategoryInterface> => {
+    const result: any = await executeQuery(
+        `SELECT * FROM categories WHERE name='${name}'`
+    )
+
+    return itemFromResult(result)
+}
+
 export const deleteCategory = async (id: string) => {
     await executeQuery(
         `DELETE FROM categories WHERE id='${id}'`
@@ -214,7 +230,6 @@ export const getTransactions = async (date: Date): Promise<TransactionInterface[
 
     const items = []
     const rows = result.rows
-
 
     for (let i = 0; i < rows.length; i++) {
         let item = rows.item(i)
