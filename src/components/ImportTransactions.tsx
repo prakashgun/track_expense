@@ -48,6 +48,83 @@ const ImportTransactions = ({ navigation, route }: any) => {
         }
     }, [isFocused])
 
+    const addTransactionFromRecord = async (
+        record: ImportRecordInterface,
+        isIncome: boolean = false,
+        isTransfer: boolean = false
+    ): Promise<boolean> => {
+        let account_name: string = ''
+
+            account_name = isIncome ? record.income_or_transfer_in_account : record.expense_or_transfer_out_account
+        
+
+        let account: AccountInterface = await getAccountByName(account_name)
+
+        if (!account) {
+            console.log(`Creating non existant account: ${account_name}`)
+
+            await addAccount({
+                id: uuidv4(),
+                name: account_name.trim(),
+                initial_balance: 0
+            })
+
+            account = await getAccountByName(account_name)
+        }
+
+        let category: CategoryInterface = await getCategoryByName(record.category)
+
+        if (!category) {
+            console.log(`Creating non existant category: ${record.category}`)
+
+            await addCategory({
+                id: uuidv4(),
+                name: record.category,
+                icon_name: 'miscellaneous-services',
+                icon_type: 'material-icons'
+            })
+
+            category = await getCategoryByName(record.category)
+        }
+
+        const from_transaction_id: string = uuidv4()
+
+        await addTransaction({
+            id: from_transaction_id,
+            name: record.note,
+            value: record.amount,
+            is_income: isIncome,
+            account: account,
+            category: category,
+            transaction_date: record.date
+        })
+
+        if(!isTransfer){
+            return true
+        }
+
+        const to_transaction_id: string = uuidv4()
+        isIncome = true
+
+        await addTransaction({
+            id: from_transaction_id,
+            name: record.note,
+            value: record.amount,
+            is_income: isIncome,
+            account: account,
+            category: category,
+            transaction_date: record.date
+        })
+
+            await addTransfer({
+                id: uuidv4(),
+                from_transaction: await getTransaction(from_transaction_id),
+                to_transaction: await getTransaction(to_transaction_id)
+            })
+
+        return true
+    }
+
     const insertRecords = async (records: ImportRecordInterface[]) => {
         console.log('Started inserting records')
         console.log(records)
@@ -65,65 +142,17 @@ const ImportTransactions = ({ navigation, route }: any) => {
                     continue
                 }
 
-                let is_income = false
-                let account_name = ''
-
                 if (record.expense_or_transfer_out_account && record.income_or_transfer_in_account) {
-                    console.log('Transaction not suported now. Skipping...')
-                    continue
+                    await addTransactionFromRecord(record, false, true)
                 } else if (!record.expense_or_transfer_out_account && record.income_or_transfer_in_account) {
-                    is_income = true
-                    account_name = record.income_or_transfer_in_account
+                    await addTransactionFromRecord(record, true)
                 } else if (record.expense_or_transfer_out_account && !record.income_or_transfer_in_account) {
-                    is_income = false
-                    account_name = record.expense_or_transfer_out_account
+                    await addTransactionFromRecord(record)
                 } else {
                     console.log('Cannot identify expense type for this record:')
                     console.log(record)
                     continue
                 }
-
-                let account: AccountInterface = await getAccountByName(account_name)
-
-                if (!account) {
-                    console.log(`Creating non existant account: ${account_name}`)
-
-                    await addAccount({
-                        id: uuidv4(),
-                        name: account_name.trim(),
-                        initial_balance: 0
-                    })
-
-                    account = await getAccountByName(account_name)
-                }
-
-                let category: CategoryInterface = await getCategoryByName(record.category)
-
-                if (!category) {
-                    console.log(`Creating non existant category: ${record.category}`)
-
-                    await addCategory({
-                        id: uuidv4(),
-                        name: record.category,
-                        icon_name: 'miscellaneous-services',
-                        icon_type: 'material-icons'
-                    })
-
-                    category = await getCategoryByName(record.category)
-                }
-
-                const from_transaction_id: string = uuidv4()
-
-                console.log(await addTransaction({
-                    id: from_transaction_id,
-                    name: record.note,
-                    value: record.amount,
-                    is_income: is_income,
-                    account: account,
-                    category: category,
-                    transaction_date: record.date
-                }))
-
             }
         }
 
