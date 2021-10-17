@@ -1,15 +1,15 @@
 import { useIsFocused } from '@react-navigation/native'
 import moment from 'moment'
 import React, { useEffect, useState } from 'react'
-import { Alert, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, StyleSheet, TouchableOpacity, View } from 'react-native'
 import DocumentPicker from 'react-native-document-picker'
 import { Header, Input } from 'react-native-elements'
 import { readFile } from 'react-native-fs'
 import { v4 as uuidv4 } from 'uuid'
 import XLSX from 'xlsx'
 import {
-    addAccount, addCategory, addTransaction, getAccountByName, getAccounts, getCategoryByName,
-    getTransaction
+    addAccount, addCategory, addTransaction, addTransfer, getAccountByName, getAccounts,
+    getCategoryByName, getTransaction
 } from '../common/dbQueries'
 import AccountInterface from '../interfaces/AccountInterface'
 import CategoryInterface from '../interfaces/CategoryInterface'
@@ -22,7 +22,7 @@ import ImportBankSelect from './ImportBankSelect'
 const ImportTransactions = ({ navigation, route }: any) => {
     const [accounts, setAccounts] = useState<AccountInterface[]>()
     const [selectedToAccount, setSelectedToAccount] = useState<AccountInterface>()
-    const [isLoading, setIsLoading] = useState(true)
+    const [isLoading, setIsLoading] = useState(false)
     const [selectedImportBank, setSelectedImportBank] = useState(importBanks[0])
     const isFocused = useIsFocused()
 
@@ -55,8 +55,8 @@ const ImportTransactions = ({ navigation, route }: any) => {
     ): Promise<boolean> => {
         let account_name: string = ''
 
-            account_name = isIncome ? record.income_or_transfer_in_account : record.expense_or_transfer_out_account
-        
+        account_name = isIncome ? record.income_or_transfer_in_account : record.expense_or_transfer_out_account
+
 
         let account: AccountInterface = await getAccountByName(account_name)
 
@@ -99,28 +99,46 @@ const ImportTransactions = ({ navigation, route }: any) => {
             transaction_date: record.date
         })
 
-        if(!isTransfer){
+        if (!isTransfer) {
             return true
         }
 
+        if (record.income_or_transfer_in_account === record.expense_or_transfer_out_account) {
+            console.log('From and to account cannot be the same in a transfer')
+            return false
+        }
+
         const to_transaction_id: string = uuidv4()
-        isIncome = true
+        account_name = record.income_or_transfer_in_account
+        account = await getAccountByName(account_name)
+
+        if (!account) {
+            console.log(`Creating non existant account: ${account_name}`)
+
+            await addAccount({
+                id: uuidv4(),
+                name: account_name.trim(),
+                initial_balance: 0
+            })
+
+            account = await getAccountByName(account_name)
+        }
 
         await addTransaction({
-            id: from_transaction_id,
+            id: to_transaction_id,
             name: record.note,
             value: record.amount,
-            is_income: isIncome,
+            is_income: true,
             account: account,
             category: category,
             transaction_date: record.date
         })
 
-            await addTransfer({
-                id: uuidv4(),
-                from_transaction: await getTransaction(from_transaction_id),
-                to_transaction: await getTransaction(to_transaction_id)
-            })
+        await addTransfer({
+            id: uuidv4(),
+            from_transaction: await getTransaction(from_transaction_id),
+            to_transaction: await getTransaction(to_transaction_id)
+        })
 
         return true
     }
@@ -128,6 +146,8 @@ const ImportTransactions = ({ navigation, route }: any) => {
     const insertRecords = async (records: ImportRecordInterface[]) => {
         console.log('Started inserting records')
         console.log(records)
+        setIsLoading(true)
+
         for (const record of records) {
             if (record.system_generated_id) {
                 if (await getTransaction(record.system_generated_id)) {
@@ -156,6 +176,7 @@ const ImportTransactions = ({ navigation, route }: any) => {
             }
         }
 
+        setIsLoading(false)
         Alert.alert('Completed')
     }
 
@@ -336,15 +357,16 @@ const ImportTransactions = ({ navigation, route }: any) => {
                     setSelectedAccount={setSelectedToAccount}
                     isFromAccount={false}
                 />}
-            <TouchableOpacity onPress={onSelectFilePress}>
-                <Input
-                    placeholder='Select file to import (.xls, .xlsx)'
-                    leftIcon={{ type: 'antdesign', name: 'select1' }}
-                    style={styles.input}
-                    disabled
-                    disabledInputStyle={styles.disabled_input}
-                />
-            </TouchableOpacity>
+            {isLoading ? <ActivityIndicator size="large" color="#3e3b33" /> :
+                <TouchableOpacity onPress={onSelectFilePress}>
+                    <Input
+                        placeholder='Select file to import (.xls, .xlsx)'
+                        leftIcon={{ type: 'antdesign', name: 'select1' }}
+                        style={styles.input}
+                        disabled
+                        disabledInputStyle={styles.disabled_input}
+                    />
+                </TouchableOpacity>}
         </View>
     )
 }
