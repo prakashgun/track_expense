@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid'
 import XLSX from 'xlsx'
 import {
     addAccount, addCategory, addTransaction, addTransfer, getAccountByName, getAccounts,
+    getCategories,
     getCategoryByName, getTransaction
 } from '../common/dbQueries'
 import AccountInterface from '../interfaces/AccountInterface'
@@ -21,6 +22,7 @@ import ImportBankSelect from './ImportBankSelect'
 
 const ImportTransactions = ({ navigation, route }: any) => {
     const [accounts, setAccounts] = useState<AccountInterface[]>()
+    const [categories, setCategories] = useState<CategoryInterface[]>()
     const [selectedToAccount, setSelectedToAccount] = useState<AccountInterface>()
     const [isLoading, setIsLoading] = useState(false)
     const [selectedImportBank, setSelectedImportBank] = useState(importBanks[0])
@@ -30,6 +32,7 @@ const ImportTransactions = ({ navigation, route }: any) => {
         setIsLoading(true)
         const allAccounts = await getAccounts()
         setAccounts(allAccounts)
+        setCategories(await getCategories())
 
         if (allAccounts.length > 1) {
             setSelectedToAccount(allAccounts[1])
@@ -47,6 +50,31 @@ const ImportTransactions = ({ navigation, route }: any) => {
             setIsLoading(false)
         }
     }, [isFocused])
+
+    const guessCategory = (note: string): string => {
+
+        if (!categories) {
+            throw 'No categories exist'
+        }
+
+        for (const category of categories) {
+            if (category.name === 'Food') {
+                const keywords = ['swiggy', 'zomato', 'food']
+                // It should be food category if any of these food related words exist
+                if (keywords.some(keyword => note.toLowerCase().includes(keyword))) {
+                    return category.name
+                }
+            }
+        }
+
+        for (const category of categories) {
+            if (category.name === 'Other') {
+                return category.name
+            }
+        }
+
+        return categories[0].name
+    }
 
     const addTransactionFromRecord = async (
         record: ImportRecordInterface,
@@ -183,12 +211,10 @@ const ImportTransactions = ({ navigation, route }: any) => {
     const parseRecords = (selectedImportBank: ImportBankInterface, data: Array<any>): ImportRecordInterface[] => {
         let foundData: boolean = false, key_phrase: string
         let amount: number, expense_or_transfer_out_account: string, income_or_transfer_in_account: string
-        let category_name: string
+        let category_name: string, note: string = ''
         let date_column: number, dr_column: number, cr_column: number, note_column: number
-        const date_regex = /^(?:(?:31(\/|-|\.)(?:0?[13578]|1[02]))\1|(?:(?:29|30)(\/|-|\.)(?:0?[13-9]|1[0-2])\2))(?:(?:1[6-9]|[2-9]\d)?\d{2})$|^(?:29(\/|-|\.)0?2\3(?:(?:(?:1[6-9]|[2-9]\d)?(?:0[48]|[2468][048]|[13579][26])|(?:(?:16|[2468][048]|[3579][26])00))))$|^(?:0?[1-9]|1\d|2[0-8])(\/|-|\.)(?:(?:0?[1-9])|(?:1[0-2]))\4(?:(?:1[6-9]|[2-9]\d)?\d{2})$/
         let records: ImportRecordInterface[] = Array()
 
-        console.log(selectedImportBank.name)
         if (selectedImportBank.name == 'Other') {
             date_column = 0
             key_phrase = 'expense or transfer out account'
@@ -254,7 +280,15 @@ const ImportTransactions = ({ navigation, route }: any) => {
 
         data.forEach((line: any) => {
             if (foundData) {
-                if (date_regex.test(line[date_column])) {
+                // Convert the date string to moment object
+
+                let momentDate = moment.utc(line[date_column], 'DD-MM-YYYY')
+                if (momentDate.isValid()) {
+                    console.log('Date to convert')
+                    console.log(line[date_column])
+                    console.log(momentDate)
+                    note = line[note_column].trim()
+
                     if (line[dr_column]) {
                         amount = parseFloat(line[dr_column])
                         expense_or_transfer_out_account = selectedImportBank.name
@@ -266,12 +300,12 @@ const ImportTransactions = ({ navigation, route }: any) => {
                     }
 
                     records.push({
-                        date: line[date_column].trim(),
+                        date: momentDate.toDate(),
                         amount: amount,
-                        category: category_name,
+                        category: guessCategory(note),
                         expense_or_transfer_out_account: expense_or_transfer_out_account,
                         income_or_transfer_in_account: income_or_transfer_in_account,
-                        note: line[note_column].trim(),
+                        note: note,
                         system_generated_id: ''
                     })
                 }
