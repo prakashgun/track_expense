@@ -252,8 +252,6 @@ export const getTransactions = async (date: Date): Promise<TransactionInterface[
 }
 
 export const addTransaction = async (transaction: TransactionInterface) => {
-    console.log('Adding transaction entry')
-
     return await executeQuery(
         `INSERT INTO transactions (id, name, value, is_income, transaction_date, account_id, category_id) VALUES (
                 '${transaction.id}',

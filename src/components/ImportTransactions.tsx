@@ -51,6 +51,20 @@ const ImportTransactions = ({ navigation, route }: any) => {
         }
     }, [isFocused])
 
+    useEffect(()=>{
+        if(!accounts){
+            console.log('No accounts exist')
+            return
+        }
+
+        // Incase the import bank name changes choose the matching account as to account
+        for(const account of accounts){
+            if(selectedImportBank.name.toLowerCase() === account.name.toLowerCase()){
+                setSelectedToAccount(account)
+            }
+        }
+    }, [selectedImportBank])
+
     const guessCategory = (note: string): string => {
 
         if (!categories) {
@@ -68,11 +82,12 @@ const ImportTransactions = ({ navigation, route }: any) => {
         }
 
         for (const category of categories) {
-            if (category.name === 'Other') {
+            if (category.name === 'Others') {
                 return category.name
             }
         }
 
+        console.log(`First category name ${categories[0].name}`)
         return categories[0].name
     }
 
@@ -211,7 +226,7 @@ const ImportTransactions = ({ navigation, route }: any) => {
     const parseRecords = (selectedImportBank: ImportBankInterface, data: Array<any>): ImportRecordInterface[] => {
         let foundData: boolean = false, key_phrase: string
         let amount: number, expense_or_transfer_out_account: string, income_or_transfer_in_account: string
-        let category_name: string, note: string = ''
+        let note: string = '', date_format: string = 'DD-MM-YYYY'
         let date_column: number, dr_column: number, cr_column: number, note_column: number
         let records: ImportRecordInterface[] = Array()
 
@@ -251,42 +266,45 @@ const ImportTransactions = ({ navigation, route }: any) => {
         switch (selectedImportBank.name) {
             case 'Axis':
                 key_phrase = 'Tran Date'
-                category_name = 'Others'
                 date_column = 1
                 note_column = 3
                 dr_column = 4
                 cr_column = 5
+                date_format = 'DD-MM-YYYY'
                 break
             case 'HDFC':
                 key_phrase = 'Withdrawal Amt.'
-                category_name = 'Others'
                 date_column = 0
                 note_column = 1
                 dr_column = 4
                 cr_column = 5
+                date_format = 'DD/MM/YY'
                 break
             case 'Icici':
                 key_phrase = 'Value Date'
-                category_name = 'Others'
                 date_column = 2
-                note_column = 4
+                note_column = 5
                 dr_column = 6
                 cr_column = 7
+                date_format = 'DD/MM/YYYY'
                 break
+            case 'Other':
+                return records
 
             default:
+                console.log('Unsupported import bank name')
+                Alert.alert('Unsuported import bank name')
                 return records
         }
 
         data.forEach((line: any) => {
             if (foundData) {
                 // Convert the date string to moment object
+                console.log(line)
+                let momentDate = moment.utc(line[date_column], date_format)
 
-                let momentDate = moment.utc(line[date_column], 'DD-MM-YYYY')
                 if (momentDate.isValid()) {
-                    console.log('Date to convert')
                     console.log(line[date_column])
-                    console.log(momentDate)
                     note = line[note_column].trim()
 
                     if (line[dr_column]) {
