@@ -3,14 +3,18 @@ import React, { useEffect, useState } from 'react'
 import { Alert, StyleSheet, View } from 'react-native'
 import { Header, PricingCard } from 'react-native-elements'
 import { deleteAccount, getAccount } from '../common/dbQueries'
+import { getCurrentBalance } from '../common/utils'
 import AccountInterface from '../interfaces/AccountInterface'
 
 const AccountScreen = ({ navigation, route }: any) => {
     const [account, setAccount] = useState<AccountInterface>()
+    const [currentBalance, setCurrentBalance] = useState<number>(0)
     const isFocused = useIsFocused()
 
     const setAccountFromDb = async () => {
         setAccount(await getAccount(route.params.id))
+        console.log(await getAccount(route.params.id))
+
     }
 
     const deleteAccountFromDb = async () => {
@@ -24,6 +28,13 @@ const AccountScreen = ({ navigation, route }: any) => {
             setAccountFromDb()
         }
     }, [isFocused])
+
+    useEffect(()=>{
+        if(!account){
+            return
+        }
+        setCurrentBalance(getCurrentBalance(account))
+    },[account])
 
     const onDeleteItemPress = () => {
         Alert.alert(
@@ -52,7 +63,7 @@ const AccountScreen = ({ navigation, route }: any) => {
             {account && <PricingCard
                 color="#3e3b33"
                 title={account.name}
-                price={account.initial_balance}
+                price={currentBalance}
                 button={{ title: 'Delete', onPress: () => onDeleteItemPress() }}
             />}
         </View>

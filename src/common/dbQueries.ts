@@ -166,7 +166,11 @@ export const getAccount = async (id: string): Promise<AccountInterface> => {
         `SELECT * FROM accounts WHERE id='${id}'`
     )
 
-    return itemFromResult(result)
+    let item = result.rows.item(0)
+    item['total_expense'] = await getTotalExpense(item)
+    item['total_income'] = await getTotalIncome(item)
+
+    return item
 }
 
 export const getAccountByName = async (name: string): Promise<AccountInterface> => {
