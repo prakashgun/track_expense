@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { Alert, StyleSheet, View } from 'react-native'
 import { Header, PricingCard } from 'react-native-elements'
 import { deleteAccount, getAccount } from '../common/dbQueries'
-import { getCurrentBalance } from '../common/utils'
+import { getCurrentBalance, roundCurrency, thousands_separators } from '../common/utils'
 import AccountInterface from '../interfaces/AccountInterface'
 
 const AccountScreen = ({ navigation, route }: any) => {
@@ -29,12 +29,12 @@ const AccountScreen = ({ navigation, route }: any) => {
         }
     }, [isFocused])
 
-    useEffect(()=>{
-        if(!account){
+    useEffect(() => {
+        if (!account) {
             return
         }
         setCurrentBalance(getCurrentBalance(account))
-    },[account])
+    }, [account])
 
     const onDeleteItemPress = () => {
         Alert.alert(
@@ -63,7 +63,7 @@ const AccountScreen = ({ navigation, route }: any) => {
             {account && <PricingCard
                 color="#3e3b33"
                 title={account.name}
-                price={currentBalance}
+                price={thousands_separators(roundCurrency(currentBalance))}
                 button={{ title: 'Delete', onPress: () => onDeleteItemPress() }}
             />}
         </View>
