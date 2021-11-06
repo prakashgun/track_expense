@@ -175,7 +175,7 @@ export const getAccount = async (id: string): Promise<AccountInterface> => {
 
 export const getAccountByName = async (name: string): Promise<AccountInterface> => {
     const result: any = await executeQuery(
-        `SELECT * FROM accounts WHERE name='${name}'`
+        `SELECT * FROM accounts WHERE lower(name)='${name.toLowerCase()}'`
     )
 
     return itemFromResult(result)
@@ -212,7 +212,7 @@ export const getCategory = async (id: string): Promise<CategoryInterface> => {
 
 export const getCategoryByName = async (name: string): Promise<CategoryInterface> => {
     const result: any = await executeQuery(
-        `SELECT * FROM categories WHERE name='${name}'`
+        `SELECT * FROM categories WHERE lower(name)='${name.toLowerCase()}'`
     )
 
     return itemFromResult(result)
