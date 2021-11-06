@@ -12,6 +12,7 @@ import {
     getCategories,
     getCategoryByName, getTransaction
 } from '../common/dbQueries'
+import { excelDateToUnixTimestamp } from '../common/utils'
 import AccountInterface from '../interfaces/AccountInterface'
 import CategoryInterface from '../interfaces/CategoryInterface'
 import ImportBankInterface, { importBanks } from '../interfaces/ImportBankInterface'
@@ -51,15 +52,15 @@ const ImportTransactions = ({ navigation, route }: any) => {
         }
     }, [isFocused])
 
-    useEffect(()=>{
-        if(!accounts){
+    useEffect(() => {
+        if (!accounts) {
             console.log('No accounts exist')
             return
         }
 
         // Incase the import bank name changes choose the matching account as to account
-        for(const account of accounts){
-            if(selectedImportBank.name.toLowerCase() === account.name.toLowerCase()){
+        for (const account of accounts) {
+            if (selectedImportBank.name.toLowerCase() === account.name.toLowerCase()) {
                 setSelectedToAccount(account)
             }
         }
@@ -224,21 +225,19 @@ const ImportTransactions = ({ navigation, route }: any) => {
     }
 
     const parseRecords = (selectedImportBank: ImportBankInterface, data: Array<any>): ImportRecordInterface[] => {
-        let foundData: boolean = false, key_phrase: string
+        let foundData: boolean = false, key_phrase: string, momentDate: moment.Moment
         let amount: number, expense_or_transfer_out_account: string, income_or_transfer_in_account: string
         let note: string = '', date_format: string = 'DD-MM-YYYY'
         let date_column: number, dr_column: number, cr_column: number, note_column: number
         let records: ImportRecordInterface[] = Array()
+        let stringDate = true
 
         if (selectedImportBank.name == 'Other') {
             date_column = 0
             key_phrase = 'expense or transfer out account'
 
             data.forEach((line: any) => {
-                //https://stackoverflow.com/a/57154675/6842203
-                let unixTimestamp = (line[date_column] - 25569) * 86400 //as per the post above, convert Excel date to unix timestamp, assuming Mac/Windows Excel 2011 onwards
-
-                let momentDate = moment(new Date(unixTimestamp * 1000))
+                let momentDate = moment(new Date(excelDateToUnixTimestamp(line[date_column]) * 1000))
                 if (foundData) {
                     if (momentDate.isValid()) {
                         records.push({
@@ -264,7 +263,7 @@ const ImportTransactions = ({ navigation, route }: any) => {
         }
 
         switch (selectedImportBank.name) {
-            case 'Axis':
+            case 'AXIS':
                 key_phrase = 'Tran Date'
                 date_column = 1
                 note_column = 3
@@ -280,13 +279,22 @@ const ImportTransactions = ({ navigation, route }: any) => {
                 cr_column = 5
                 date_format = 'DD/MM/YY'
                 break
-            case 'Icici':
+            case 'ICICI':
                 key_phrase = 'Value Date'
                 date_column = 2
                 note_column = 5
                 dr_column = 6
                 cr_column = 7
                 date_format = 'DD/MM/YYYY'
+                break
+            case 'SBI':
+                key_phrase = 'Txn Date'
+                date_column = 0
+                note_column = 2
+                dr_column = 4
+                cr_column = 5
+                date_format = 'D M YYYY'
+                stringDate = false
                 break
             case 'Other':
                 return records
@@ -300,19 +308,38 @@ const ImportTransactions = ({ navigation, route }: any) => {
         data.forEach((line: any) => {
             if (foundData) {
                 // Convert the date string to moment object
+                console.log('date_column')
+                console.log(line[date_column])
+                console.log('line')
                 console.log(line)
-                let momentDate = moment.utc(line[date_column], date_format)
+                console.log('all items')
+                console.log('--------------------')
+                let i = 0
+                for (const item of line) {
+                    console.log(`'index: ${i}`)
+                    console.log(item)
+                    i++
+                }
+                console.log('length:')
+                console.log(line.length)
+                if (stringDate) {
+                     momentDate = moment.utc(line[date_column], date_format)
+                } else {
+                     momentDate = moment(new Date(excelDateToUnixTimestamp(line[date_column]) * 1000))
+                }
 
                 if (momentDate.isValid()) {
                     console.log(line[date_column])
                     note = line[note_column].trim()
+                    let dr_value: number = typeof line[dr_column] === 'string' ? parseFloat(line[dr_column].trim()) : line[dr_column]
+                    let cr_value:number = typeof line[cr_column] === 'string' ? parseFloat(line[cr_column].trim()) : line[cr_column]
 
-                    if (line[dr_column]) {
-                        amount = parseFloat(line[dr_column])
+                    if (dr_value) {
+                        amount = dr_value
                         expense_or_transfer_out_account = selectedImportBank.name
                         income_or_transfer_in_account = ''
                     } else {
-                        amount = parseFloat(line[cr_column])
+                        amount = cr_value
                         expense_or_transfer_out_account = ''
                         income_or_transfer_in_account = selectedImportBank.name
                     }

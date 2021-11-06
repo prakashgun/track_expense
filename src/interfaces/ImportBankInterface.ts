@@ -6,10 +6,13 @@ export const importBanks: ImportBankInterface[] = [
         name: 'HDFC'
     },
     {
-        name: 'Axis'
+        name: 'AXIS'
     },
     {
-        name: 'Icici'
+        name: 'ICICI'
+    },
+    {
+        name: 'SBI'
     }
 ]
 

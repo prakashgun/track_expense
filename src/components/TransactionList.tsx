@@ -29,7 +29,7 @@ const TransactionItem = ({ transaction, onPress }: TransactionItemInterface) => 
             </ListItem.Content>
             <ListItem.Content right>
                 <ListItem.Title style={{ color: (transaction.is_income) ? 'green' : 'red' }}>
-                    {transaction.value}
+                    {transaction.value.toLocaleString('en')}
                 </ListItem.Title>
                 <ListItem.Subtitle>{transaction.account.name}</ListItem.Subtitle>
             </ListItem.Content>

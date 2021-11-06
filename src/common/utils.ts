@@ -22,6 +22,11 @@ export const frameDbDateTime = (date: Date): string => {
 export const getCurrentBalance = (account: AccountInterface): number => {
     let total_income = account.total_income !== undefined ? account.total_income : 0
     let total_expense = account.total_expense !== undefined ? account.total_expense : 0
-    
+
     return (account.initial_balance + total_income - total_expense)
+}
+
+export const excelDateToUnixTimestamp = (date_value: number): number => {
+    //https://stackoverflow.com/a/57154675/6842203
+    return (date_value - 25569) * 86400 //as per the post above, convert Excel date to unix timestamp, assuming Mac/Windows Excel 2011 onwards
 }

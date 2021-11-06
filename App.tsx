@@ -18,6 +18,7 @@ import Menu from './src/components/Menu'
 import TransactionList from './src/components/TransactionList'
 import TransactionScreen from './src/components/TransactionScreen'
 
+
 const theme = {
   Button: {
     buttonStyle: {
