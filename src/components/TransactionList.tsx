@@ -5,6 +5,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View } fro
 import DatePicker from 'react-native-date-picker'
 import { Button, Header, Icon, ListItem } from 'react-native-elements'
 import { getTransactions } from '../common/dbQueries'
+import { thousands_separators } from '../common/utils'
 import TransactionInterface from '../interfaces/TransactionInterface'
 import TransactionItemInterface from '../interfaces/TransactionItemInterface'
 
@@ -29,7 +30,7 @@ const TransactionItem = ({ transaction, onPress }: TransactionItemInterface) => 
             </ListItem.Content>
             <ListItem.Content right>
                 <ListItem.Title style={{ color: (transaction.is_income) ? 'green' : 'red' }}>
-                    {transaction.value.toLocaleString('en')}
+                    {thousands_separators(transaction.value)}
                 </ListItem.Title>
                 <ListItem.Subtitle>{transaction.account.name}</ListItem.Subtitle>
             </ListItem.Content>

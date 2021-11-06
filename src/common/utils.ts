@@ -30,3 +30,10 @@ export const excelDateToUnixTimestamp = (date_value: number): number => {
     //https://stackoverflow.com/a/57154675/6842203
     return (date_value - 25569) * 86400 //as per the post above, convert Excel date to unix timestamp, assuming Mac/Windows Excel 2011 onwards
 }
+
+export const thousands_separators = (num: number) => {
+    var num_parts = num.toString().split(".");
+    num_parts[0] = num_parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return num_parts.join(".");
+}
+

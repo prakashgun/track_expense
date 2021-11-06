@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { Button, Header, Icon, ListItem } from 'react-native-elements'
 import { getAccounts } from '../common/dbQueries'
-import { getCurrentBalance } from '../common/utils'
+import { getCurrentBalance, thousands_separators } from '../common/utils'
 import AccountInterface from '../interfaces/AccountInterface'
 import AccountItemInterface from '../interfaces/AccountItemInterface'
 
@@ -20,7 +20,7 @@ const AccountItem = ({ account, onPress }: AccountItemInterface) => {
                 <ListItem.Title>{account.name}</ListItem.Title>
             </ListItem.Content>
             <ListItem.Content right>
-                <ListItem.Title>{getCurrentBalance(account)}</ListItem.Title>
+                <ListItem.Title>{thousands_separators(getCurrentBalance(account))}</ListItem.Title>
             </ListItem.Content>
         </ListItem>
     </TouchableOpacity >
