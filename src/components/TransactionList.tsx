@@ -1,42 +1,13 @@
 import { useNavigation } from '@react-navigation/core'
 import { useIsFocused } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native'
 import DatePicker from 'react-native-date-picker'
-import { Button, Header, Icon, ListItem } from 'react-native-elements'
+import { Button, Header, Icon } from 'react-native-elements'
 import { getTransactions } from '../common/dbQueries'
-import { thousands_separators } from '../common/utils'
 import TransactionInterface from '../interfaces/TransactionInterface'
-import TransactionItemInterface from '../interfaces/TransactionItemInterface'
+import TransactionItem from './TransactionItem'
 
-const TransactionItem = ({ transaction, onPress }: TransactionItemInterface) => (
-    <TouchableOpacity onPress={onPress}>
-        <ListItem
-            key={transaction.id}
-            bottomDivider
-        >
-            {
-                (transaction.id === transaction.from_transaction?.id
-                    || transaction.id === transaction.to_transaction?.id) &&
-                <Icon name="bank-transfer" type="material-community" />
-            }
-            <Icon
-                name={(transaction.is_income) ? 'attach-money' : 'money-off'}
-                type="material-icons"
-            />
-            <ListItem.Content>
-                <ListItem.Title>{transaction.category.name}</ListItem.Title>
-                {transaction.name.trim() !== '' && <ListItem.Subtitle>{transaction.name}</ListItem.Subtitle>}
-            </ListItem.Content>
-            <ListItem.Content right>
-                <ListItem.Title style={{ color: (transaction.is_income) ? 'green' : 'red' }}>
-                    {thousands_separators(transaction.value)}
-                </ListItem.Title>
-                <ListItem.Subtitle>{transaction.account.name}</ListItem.Subtitle>
-            </ListItem.Content>
-        </ListItem>
-    </TouchableOpacity>
-)
 
 const TransactionList = () => {
     const navigation = useNavigation<any>()
