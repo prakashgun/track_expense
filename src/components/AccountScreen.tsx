@@ -34,7 +34,7 @@ const AccountScreen = ({ navigation, route }: any) => {
             return
         }
         setIsLoading(true)
-        await setTransactions(await getLastAccountTransactions(account, 4))
+        await setTransactions(await getLastAccountTransactions(account, 100))
         setIsLoading(false)
     }
 
