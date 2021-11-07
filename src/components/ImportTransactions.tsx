@@ -188,8 +188,6 @@ const ImportTransactions = ({ navigation, route }: any) => {
     }
 
     const insertRecords = async (records: ImportRecordInterface[]) => {
-        console.log('Started inserting records')
-        console.log(records)
         setIsLoading(true)
 
         for (const record of records) {
@@ -307,41 +305,33 @@ const ImportTransactions = ({ navigation, route }: any) => {
 
         data.forEach((line: any) => {
             if (foundData) {
-                // Convert the date string to moment object
-                console.log('date_column')
-                console.log(line[date_column])
-                console.log('line')
-                console.log(line)
-                console.log('all items')
-                console.log('--------------------')
-                let i = 0
-                for (const item of line) {
-                    console.log(`'index: ${i}`)
-                    console.log(item)
-                    i++
+
+                if (!selectedToAccount) {
+                    console.log('Select to account is empty')
+                    return records
                 }
-                console.log('length:')
-                console.log(line.length)
+
+                // Convert the date string to moment object
                 if (stringDate) {
-                     momentDate = moment.utc(line[date_column], date_format)
+                    momentDate = moment.utc(line[date_column], date_format)
                 } else {
-                     momentDate = moment(new Date(excelDateToUnixTimestamp(line[date_column]) * 1000))
+                    momentDate = moment(new Date(excelDateToUnixTimestamp(line[date_column]) * 1000))
                 }
 
                 if (momentDate.isValid()) {
                     console.log(line[date_column])
                     note = line[note_column].trim()
                     let dr_value: number = typeof line[dr_column] === 'string' ? parseFloat(line[dr_column].trim()) : line[dr_column]
-                    let cr_value:number = typeof line[cr_column] === 'string' ? parseFloat(line[cr_column].trim()) : line[cr_column]
+                    let cr_value: number = typeof line[cr_column] === 'string' ? parseFloat(line[cr_column].trim()) : line[cr_column]
 
                     if (dr_value) {
                         amount = dr_value
-                        expense_or_transfer_out_account = selectedImportBank.name
+                        expense_or_transfer_out_account = selectedToAccount.name
                         income_or_transfer_in_account = ''
                     } else {
                         amount = cr_value
                         expense_or_transfer_out_account = ''
-                        income_or_transfer_in_account = selectedImportBank.name
+                        income_or_transfer_in_account = selectedToAccount.name
                     }
 
                     records.push({
@@ -380,9 +370,6 @@ const ImportTransactions = ({ navigation, route }: any) => {
                 const data = XLSX.utils.sheet_to_json(ws, { header: 1 })
                 // Took from https://stackoverflow.com/a/15504877/6842203
                 records = parseRecords(selectedImportBank, data)
-
-                console.log('records')
-                console.log(records)
 
                 if (records) {
                     Alert.alert(
