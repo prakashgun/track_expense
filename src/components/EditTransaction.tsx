@@ -48,7 +48,7 @@ const EditTransaction = ({ navigation, route }: any) => {
 
     const setTransferFromDb = async () => {
         if (!transaction) {
-            console.log('Transaction not exist')
+            console.log('Transaction not yet ready or not exist')
             return
         }
         setTransfer(await getTransfer(transaction))
@@ -64,7 +64,7 @@ const EditTransaction = ({ navigation, route }: any) => {
 
     useEffect(() => {
         if (!transaction) {
-            console.log('Transaction not exist')
+            console.log('Transaction not yet ready or not exist')
             return
         }
         setSelectedAccount(transaction.account)

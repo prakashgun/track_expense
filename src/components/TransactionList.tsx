@@ -72,9 +72,15 @@ const TransactionList = () => {
                                 <TransactionItem
                                     transaction={transaction}
                                     key={transaction.id}
-                                    onPress={() => {
-                                        return navigation.navigate('EditTransaction', { id: transaction.id, transactionDate: transactionDate.toISOString() })
-                                    }}
+                                    onPress={() =>
+                                        navigation.navigate(
+                                            'EditTransaction',
+                                            {
+                                                id: transaction.id,
+                                                transactionDate: transactionDate.toISOString()
+                                            }
+                                        )
+                                    }
                                 />
                             ))
                         }

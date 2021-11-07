@@ -255,6 +255,39 @@ export const getTransactions = async (date: Date): Promise<TransactionInterface[
     return items
 }
 
+export const getLastAccountTransactions = async (account: AccountInterface, limit: number, offset: number = 0): Promise<TransactionInterface[]> => {
+    const result: any = await executeQuery(
+        `SELECT transactions.*, transfers.from_id, transfers.to_id FROM transactions
+            LEFT JOIN transfers 
+                ON transactions.id = transfers.from_id OR transactions.id = transfers.to_id
+            WHERE transactions.account_id = '${account.id}'
+            ORDER by transactions.transaction_date DESC
+            LIMIT ${offset}, ${limit}`
+    )
+
+    const items = []
+    const rows = result.rows
+
+    for (let i = 0; i < rows.length; i++) {
+        let item = rows.item(i)
+        item['account'] = await getAccount(item['account_id'])
+        delete item['account_id']
+        item['category'] = await getCategory(item['category_id'])
+        delete item['category_id']
+        if (item['from_id']) {
+            item['from_transaction'] = await getTransaction(item['from_id'])
+            delete item['from_id']
+        }
+        if (item['to_id']) {
+            item['to_transaction'] = await getTransaction(item['to_id'])
+            delete item['to_id']
+        }
+        items.push(item)
+    }
+
+    return items
+}
+
 export const addTransaction = async (transaction: TransactionInterface) => {
     return await executeQuery(
         `INSERT INTO transactions (id, name, value, is_income, transaction_date, account_id, category_id) VALUES (
