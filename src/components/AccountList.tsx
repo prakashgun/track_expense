@@ -1,35 +1,14 @@
 import { useNavigation } from '@react-navigation/core'
 import { useIsFocused } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react'
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
-import { Button, Header, Icon, ListItem } from 'react-native-elements'
+import { ScrollView, StyleSheet, View } from 'react-native'
+import { Button, Header } from 'react-native-elements'
 import { getAccounts } from '../common/dbQueries'
-import { getCurrentBalance, roundCurrency, thousands_separators } from '../common/utils'
 import AccountInterface from '../interfaces/AccountInterface'
-import AccountItemInterface from '../interfaces/AccountItemInterface'
+import AccountItem from './AccountItem'
 
-
-const AccountItem = ({ account, onPress }: AccountItemInterface) => {
-    return < TouchableOpacity onPress={onPress} >
-        <ListItem
-            key={account.id}
-            bottomDivider
-        >
-            <Icon name="bank" type="font-awesome" />
-            <ListItem.Content>
-                <ListItem.Title>{account.name}</ListItem.Title>
-            </ListItem.Content>
-            <ListItem.Content right>
-                <ListItem.Title>
-                    {thousands_separators(roundCurrency(getCurrentBalance(account)))}
-                </ListItem.Title>
-            </ListItem.Content>
-        </ListItem>
-    </TouchableOpacity >
-}
 
 const AccountList = () => {
-
     const navigation = useNavigation<any>()
     const [accounts, setAccounts] = useState<AccountInterface[]>()
     const isFocused = useIsFocused()
