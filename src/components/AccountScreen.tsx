@@ -34,7 +34,7 @@ const AccountScreen = ({ navigation, route }: any) => {
             return
         }
         setIsLoading(true)
-        await setTransactions(await getLastAccountTransactions(account, 10))
+        await setTransactions(await getLastAccountTransactions(account, 4))
         setIsLoading(false)
     }
 
@@ -91,12 +91,12 @@ const AccountScreen = ({ navigation, route }: any) => {
                                 <TransactionItem
                                     transaction={transaction}
                                     key={transaction.id}
-                                    onPress={() => 
+                                    onPress={() =>
                                         navigation.navigate(
-                                            'EditTransaction', 
-                                            { 
-                                                id: transaction.id, 
-                                                transactionDate: moment.utc(transaction.transaction_date).toDate().toISOString() 
+                                            'EditTransaction',
+                                            {
+                                                id: transaction.id,
+                                                transactionDate: moment.utc(transaction.transaction_date).toDate().toISOString()
                                             }
                                         )
                                     }
