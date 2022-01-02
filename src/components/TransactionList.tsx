@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native'
 import DatePicker from 'react-native-date-picker'
 import { Button, Header, Icon } from 'react-native-elements'
-import { getTransactions } from '../common/dbQueries'
+import { createTables, getTransactions } from '../common/dbQueries'
 import TransactionInterface from '../interfaces/TransactionInterface'
 import TransactionItem from './TransactionItem'
 
@@ -24,6 +24,7 @@ const TransactionList = () => {
 
     const setTransactionsFromDb = async (date: Date) => {
         setIsLoading(true)
+        await createTables()
         setTransactionDate(date)
         await setTransactions(await getTransactions(date))
         setIsLoading(false)
