@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { addAccount, getAccounts } from '../../../src/common/dbQueries'
+import { addAccount, deleteAccount, getAccount, getAccounts } from '../../../src/common/dbQueries'
 
 const accounts = [
     {
@@ -18,9 +18,20 @@ describe('Accounts', () => {
         expect(await getAccounts()).toEqual([])
     })
 
-    test('adding works', async () => {
-        const result = await addAccount(accounts[0])
+    test('adding account works', async () => {
+        const account = accounts[0]
+        const result = await addAccount(account)
         expect(result).toEqual(true)
         expect(await getAccounts()).toEqual(accounts)
+        expect(await getAccount(account.id)).toEqual(account)
+    })
+
+    test('deleting account works', async ()=>{
+        const account = accounts[0]
+        const result = await addAccount(account)
+        expect(result).toEqual(true)
+        const result2 = await deleteAccount(account.id)
+        expect(result2).toEqual(true)
+        expect(await getAccounts()).toEqual([])
     })
 })

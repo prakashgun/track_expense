@@ -27,3 +27,27 @@ export const getAccounts = async (): Promise<AccountInterface[]> => {
         return []
     }
 }
+
+export const getAccount = async (id: string): Promise<AccountInterface | {}> => {
+    try {
+        const jsonValue = await AsyncStorage.getItem('@accounts')
+        const accounts = jsonValue != null ? JSON.parse(jsonValue) : []
+        return accounts.find((data: AccountInterface) => data.id === id)
+    } catch (error) {
+        console.log(error)
+        return {}
+    }
+}
+
+export const deleteAccount = async (id: string) => {
+    try {
+        const jsonValue = await AsyncStorage.getItem('@accounts')
+        const accounts = jsonValue != null ? JSON.parse(jsonValue) : []
+        const result = accounts.find((data: AccountInterface) => data.id !== id)
+        await AsyncStorage.setItem('@accounts', JSON.stringify(result))
+        return true
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
