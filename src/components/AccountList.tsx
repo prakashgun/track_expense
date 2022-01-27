@@ -9,17 +9,17 @@ import AccountItem from './AccountItem'
 
 const AccountList = ({navigation}:any) => {
     const [accounts, setAccounts] = useState<AccountInterface[]>()
-    // const isFocused = useIsFocused()
+    const isFocused = useIsFocused()
 
-    // const setAccountsFromDb = async () => {
-    //     setAccounts(await getAccounts())
-    // }
+    const setAccountsFromDb = async () => {
+        setAccounts(await getAccounts())
+    }
 
-    // useEffect(() => {
-    //     if (isFocused) {
-    //         setAccountsFromDb()
-    //     }
-    // }, [isFocused])
+    useEffect(() => {
+        if (isFocused) {
+            setAccountsFromDb()
+        }
+    }, [isFocused])
 
     return (
         <View style={styles.container}>
