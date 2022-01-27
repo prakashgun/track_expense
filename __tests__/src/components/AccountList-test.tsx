@@ -10,11 +10,13 @@
  // Note: test renderer must be required after react-native.
  import renderer from 'react-test-renderer'
  
- it('renders correctly', () => {
+jest.useFakeTimers()
+ 
+ it('renders correctly', async () => {
    renderer.create(<AccountList />)
  })
  
- it('renders default elements', ()=>{
+ it('renders default elements', async ()=>{
    const {getAllByText} = render(<AccountList />)
    expect(getAllByText('Accounts').length).toBe(1)
  })
