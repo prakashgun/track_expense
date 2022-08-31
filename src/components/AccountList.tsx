@@ -2,7 +2,7 @@ import { useIsFocused } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, View } from 'react-native'
 import { Button, Header } from 'react-native-elements'
-import { getAccounts } from '../common/dbQueries'
+import { getAccounts, addAccount } from '../common/dbQueries'
 import AccountInterface from '../interfaces/AccountInterface'
 import AccountItem from './AccountItem'
 
@@ -17,6 +17,7 @@ const AccountList = ({navigation}:any) => {
 
     useEffect(() => {
         if (isFocused) {
+            
             setAccountsFromDb()
         }
     }, [isFocused])
